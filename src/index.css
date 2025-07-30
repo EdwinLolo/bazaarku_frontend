@@ -1,1 +1,15 @@
 @import "tailwindcss";
+/* @custom-variant dark (&:where(.dark, .dark *)); */
+
+body {
+    background-color: #F7F7F7;
+}
+
+/* Custom CSS for the application */
+.bg-primary {
+    background-color: #00299d;
+}
+
+.text-primary {
+    color: #00299d;
+}

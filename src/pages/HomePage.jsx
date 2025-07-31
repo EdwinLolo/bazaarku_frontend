@@ -9,7 +9,7 @@ import TempImage from '../assets/Audio Control Panel.png';
 function Home() {
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="mt-6 mb-4">
+            <div className="mt-6 mb-4 px-4 sm:px-0">
                 <Carousel />
             </div>
 
@@ -42,8 +42,8 @@ function Home() {
                 </div>
             </section>
 
-            <div className="px-4 md:px-12 mb-10">
-                <h1 className="text-4xl text-primary font-bold mb-4">Tool Rentals</h1>
+            <section className="mb-16 px-4 md:px-12">
+                <h1 className="text-3xl text-primary font-bold mb-4">Tool Rentals</h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-8 auto-rows-fr">
                     <RentalCard
                         imageUrl={TempImage}
@@ -76,53 +76,7 @@ function Home() {
                         id="event-lighting-solutions"
                     />
                 </div>
-            </div>
-
-            {/* <div className="px-4 md:px-12 mb-5">
-                <h1 className="text-4xl text-primary font-bold mb-4">Tool Rentals Product</h1>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
-                    <RentalProductCard
-                        imageUrl={TempImage}
-                        title="Sound System 1"
-                        price="Rp. 1.000.000,00"
-                        location="Tangerang"
-                        id="sound-system-1"
-                        rental_category="audio"
-                    />
-                    <RentalProductCard
-                        imageUrl={TempImage}
-                        title="Lighting Rig A"
-                        price="Rp. 750.000,00"
-                        location="Jakarta"
-                        id="lighting-rig-a"
-                        rental_category="lighting"
-                    />
-                    <RentalProductCard
-                        imageUrl={TempImage}
-                        title="Projector HD"
-                        price="Rp. 1.200.000,00"
-                        location="Bekasi"
-                        id="projector-hd"
-                        rental_category="visual"
-                    />
-                    <RentalProductCard
-                        imageUrl={TempImage}
-                        title="Fog Machine Pro"
-                        price="Rp. 300.000,00"
-                        location="Depok"
-                        id="fog-machine-pro"
-                        rental_category="effects"
-                    />
-                    <RentalProductCard
-                        imageUrl={TempImage}
-                        title="Portable Stage 2x2m"
-                        price="Rp. 900.000,00"
-                        location="Tangerang"
-                        id="portable-stage-2x2m"
-                        rental_category="stage"
-                    />
-                </div>
-            </div> */}
+            </section>
         </div>
     );
 }

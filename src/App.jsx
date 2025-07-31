@@ -1,10 +1,9 @@
-import React from "react";
 import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  useLocation,
+    useLocation,
+    createBrowserRouter,
+    RouterProvider,
+    ScrollRestoration,
+    Outlet,
 } from "react-router-dom";
 import Navbar from "./layout/Navbar";
 import Footer from "./layout/Footer";
@@ -15,40 +14,45 @@ import EventsPage from "./pages/EventsPage";
 import VendorPage from "./pages/VendorPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
-// Admin imports
-import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
-function AppContent() {
-  const location = useLocation();
-  const hideNavFooter = location.pathname.startsWith("/admin/");
-  return (
-    <>
-      {!hideNavFooter && <Navbar />}
-      <Routes>
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/rentals" element={<RentalsPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/vendor" element={<VendorPage />} />
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Layout />,
+        children: [
+            { index: true, element: <Home /> },
+            { path: "rentals", element: <RentalsPage /> },
+            { path: "events", element: <EventsPage /> },
+            { path: "vendor", element: <VendorPage /> },
+            { path: "admin", element: <AdminDashboard /> },
+            { path: "*", element: <NotFoundPage /> },
+        ],
+    },
+], {
+    scrollRestoration: 'manual', // Required for custom anchor handling
+});
 
-        {/* ADMIN */}
-        <Route path="/admin" element={<AdminDashboard />} />
+function Layout() {
+    const location = useLocation();
+    const hideNavFooter = location.pathname.startsWith("/admin/");
 
-        {/* Catch-all route for 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-      {!hideNavFooter && <Footer />}
-    </>
-  );
+    return (
+        <>
+            <ScrollRestoration
+                getKey={(location) => {
+                    return location.hash ? location.pathname : location.key;
+                }}
+            />
+            {!hideNavFooter && <Navbar />}
+            <Outlet />
+            {!hideNavFooter && <Footer />}
+        </>
+    );
 }
 
 function App() {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
+    return <RouterProvider router={router} />;
 }
 
 export default App;

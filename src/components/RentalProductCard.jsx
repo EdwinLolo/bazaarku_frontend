@@ -1,9 +1,9 @@
 import { MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const RentalProductCard = ({ imageUrl, title, price, location, id, rental_category }) => {
+const RentalProductCard = ({ imageUrl, title, price, location, id, className = '', rental_category }) => {
     return (
-        <Link to={`/rentals/${rental_category}/${id}`} className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full">
+        <Link to={`/rentals/${rental_category}/${id}`} className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full ${className}`}>
             {/* Product Image */}
             <div className="h-40 overflow-hidden">
                 <img

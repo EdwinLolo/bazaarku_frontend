@@ -9,15 +9,18 @@ import {
 } from "react-router-dom";
 import Navbar from "./layout/Navbar";
 import Footer from "./layout/Footer";
-import AdminFooter from "./layout/AdminFooter"; // Create this component
 import Home from "./pages/HomePage";
 import RentalsPage from "./pages/RentalsPage";
 import EventsPage from "./pages/EventsPage";
 import VendorPage from "./pages/VendorPage";
 import NotFoundPage from "./pages/NotFoundPage";
 // Admin imports
+import AdminLayout from "./layout/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import { getUserProfile } from "./models/auth";
+import AdminAddUser from "./pages/admin/AdminAddUser";
+import AdminEvent from "./pages/admin/AdminEvent";
+import AdminRental from "./pages/admin/AdminRental";
+import AdminAplication from "./pages/admin/AdminAplication";
 
 // Create Auth Context
 const AuthContext = createContext();
@@ -207,7 +210,49 @@ function AppContent() {
           path="/admin"
           element={
             <AdminProtectedRoute>
-              <AdminDashboard />
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/add-user"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout>
+                <AdminAddUser />
+              </AdminLayout>
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/events"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout>
+                <AdminEvent />
+              </AdminLayout>
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/rentals"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout>
+                <AdminRental />
+              </AdminLayout>
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/applications"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout>
+                <AdminAplication />
+              </AdminLayout>
             </AdminProtectedRoute>
           }
         />
@@ -218,7 +263,6 @@ function AppContent() {
 
       {/* Conditional Footer */}
       {!isAdminRoute && <Footer />}
-      {isAdminRoute && <AdminFooter />}
     </>
   );
 }

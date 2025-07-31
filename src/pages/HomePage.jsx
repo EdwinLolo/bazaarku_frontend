@@ -1,22 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import EventCard from '../components/EventCard';
-import RentalProductCard from '../components/RentalProductCard';
 import RentalCard from '../components/RentalCard';
 
 import TempImage from '../assets/Audio Control Panel.png';
+import { getBaseUrl } from '../models/utils';
 
 function Home() {
+    const [events, setEvents] = useState([]);
+    const [rentals, setRentals] = useState([]);
+
+
     return (
         <div className="flex flex-col min-h-screen">
             <div className="mt-6 mb-4 px-4 sm:px-0">
                 <Carousel />
             </div>
 
-            {/* --- Upcoming Events Section --- */}
             <section className="mb-16 px-4 md:px-12">
-                <h2 className="text-3xl font-bold text-primary mb-8">Upcoming Events</h2>
-                {/* Applied Grid Layout for Event Cards */}
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-3xl font-bold text-primary mb-8">Upcoming Events</h2>
+                    <Link to="/events" className="text-primary font-semibold text-lg hover:underline">
+                        View All Events
+                    </Link>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                     <EventCard
                         imageUrl={TempImage}
@@ -43,7 +51,12 @@ function Home() {
             </section>
 
             <section className="mb-16 px-4 md:px-12">
-                <h1 className="text-3xl text-primary font-bold mb-4">Tool Rentals</h1>
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-3xl text-primary font-bold mb-4">Tool Rentals</h1>
+                    <Link to="/rentals" className="text-primary font-semibold text-lg hover:underline">
+                        View All Rentals
+                    </Link>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-8 auto-rows-fr">
                     <RentalCard
                         imageUrl={TempImage}

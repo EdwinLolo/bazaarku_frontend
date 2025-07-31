@@ -1,34 +1,26 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import {
-    createBrowserRouter,
-    RouterProvider,
-    Outlet, // Used in the RootLayout component and AdminLayout
-    ScrollRestoration, // Used in the RootLayout component
-    Link, // Still used in AdminProtectedRoute
-    useMatches, // Used in the RootLayout component to check route handles
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Link,
+    useLocation,
+    Navigate,
 } from "react-router-dom";
-
-// Import your layout components
 import Navbar from "./layout/Navbar";
 import Footer from "./layout/Footer";
-import AdminNavbar from "./layout/AdminNavbar"; // New: Import AdminNavbar
-import AdminFooter from "./layout/AdminFooter"; // Import AdminFooter
-import AdminLayout from "./layout/AdminLayout"; // New: Import AdminLayout
-
-// Import your page components
 import Home from "./pages/HomePage";
 import RentalsPage from "./pages/RentalsPage";
 import EventsPage from "./pages/EventsPage";
 import VendorPage from "./pages/VendorPage";
 import NotFoundPage from "./pages/NotFoundPage";
-
 // Admin imports
+import AdminLayout from "./layout/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminAddUser from "./pages/admin/AdminAddUser"; // New: Admin page import
-import AdminEvent from "./pages/admin/AdminEvent"; // New: Admin page import
-import AdminRental from "./pages/admin/AdminRental"; // New: Admin page import
-import AdminAplication from "./pages/admin/AdminAplication"; // New: Admin page import
-// import { getUserProfile } from "./models/auth"; // Keeping this import as it was in your original code, assuming it's used elsewhere.
+import AdminAddUser from "./pages/admin/AdminAddUser";
+import AdminEvent from "./pages/admin/AdminEvent";
+import AdminRental from "./pages/admin/AdminRental";
+import AdminAplication from "./pages/admin/AdminAplication";
 
 // Create Auth Context
 const AuthContext = createContext();
@@ -195,82 +187,93 @@ function AdminProtectedRoute({ children }) {
     return children;
 }
 
-// New RootLayout component to handle common layout elements and conditional rendering
-function RootLayout() {
-    // useMatches hook to get all current route matches, including their handles
-    const matches = useMatches();
+function AppContent() {
+    const location = useLocation();
 
-    // Check if any of the matched routes have a `hideNavFooter` handle set to true
-    const hideNavFooter = matches.some(
-        (match) => match.handle && match.handle.hideNavFooter
-    );
+    // Check if current path is admin route
+    const isAdminRoute = location.pathname.startsWith("/admin");
 
     return (
         <>
-            {/* ScrollRestoration for maintaining scroll position */}
-            <ScrollRestoration
-                getKey={(location) => {
-                    return location.hash ? location.pathname : location.key;
-                }}
-            />
+            {/* Show regular navbar/footer for non-admin routes */}
+            {!isAdminRoute && <Navbar />}
 
-            {/* Conditionally render Navbar or AdminNavbar */}
-            {!hideNavFooter && <Navbar />}
-            {hideNavFooter && <AdminNavbar />} {/* Render AdminNavbar for admin routes */}
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/rentals" element={<RentalsPage />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/vendor" element={<VendorPage />} />
 
-            {/* Outlet renders the current route's component */}
-            <Outlet />
+                {/* Protected Admin Routes */}
+                <Route
+                    path="/admin"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminLayout>
+                                <AdminDashboard />
+                            </AdminLayout>
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/add-user"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminLayout>
+                                <AdminAddUser />
+                            </AdminLayout>
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/events"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminLayout>
+                                <AdminEvent />
+                            </AdminLayout>
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/rentals"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminLayout>
+                                <AdminRental />
+                            </AdminLayout>
+                        </AdminProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/applications"
+                    element={
+                        <AdminProtectedRoute>
+                            <AdminLayout>
+                                <AdminAplication />
+                            </AdminLayout>
+                        </AdminProtectedRoute>
+                    }
+                />
 
-            {/* Conditionally render Footer or AdminFooter */}
-            {!hideNavFooter && <Footer />}
-            {hideNavFooter && <AdminFooter />}
+                {/* Catch-all route for 404 */}
+                <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+
+            {/* Conditional Footer */}
+            {!isAdminRoute && <Footer />}
         </>
     );
 }
 
-// Define your routes using createBrowserRouter
-const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <RootLayout />, // Use RootLayout as the main layout component
-        children: [
-            { index: true, element: <Home /> }, // Home page, `index: true` for the default child route
-            { path: "rentals", element: <RentalsPage /> },
-            { path: "events", element: <EventsPage /> },
-            { path: "vendor", element: <VendorPage /> },
-            {
-                path: "admin", // Parent admin route
-                element: (
-                    <AdminProtectedRoute>
-                        <AdminLayout> {/* AdminLayout wraps all admin content */}
-                            <Outlet /> {/* Renders nested admin components */}
-                        </AdminLayout>
-                    </AdminProtectedRoute>
-                ),
-                handle: {
-                    hideNavFooter: true, // Hide main nav/footer for all admin routes
-                },
-                children: [
-                    { index: true, element: <AdminDashboard /> }, // Default admin route for /admin
-                    { path: "add-user", element: <AdminAddUser /> },
-                    { path: "events", element: <AdminEvent /> },
-                    { path: "rentals", element: <AdminRental /> },
-                    { path: "applications", element: <AdminAplication /> },
-                ],
-            },
-            { path: "*", element: <NotFoundPage /> }, // Catch-all route for 404
-        ],
-    },
-]);
-
-// Main App component
 function App() {
     return (
-        // Wrap the entire application with AuthProvider
-        <AuthProvider>
-            {/* Provide the router to the application */}
-            <RouterProvider router={router} />
-        </AuthProvider>
+        <Router>
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+        </Router>
     );
 }
 

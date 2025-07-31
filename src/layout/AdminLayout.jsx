@@ -1,4 +1,3 @@
-// src/layout/AdminLayout.jsx
 import React from "react";
 import AdminSidebar from "./AdminSidebar";
 

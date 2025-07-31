@@ -1,95 +1,169 @@
-import React from 'react';
-// Import Swiper React components
+import { useRef, useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-
-// Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/autoplay'; // Import if not already bundled with 'swiper/css'
+import 'swiper/css/autoplay';
+import { Navigation, Autoplay } from 'swiper/modules';
+import { getBaseUrl } from '../models/utils';
 
-// Import required modules
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+const MIN_LOOP_SLIDES = 5;
 
 function Carousel() {
-    const slides = [
-        {
-            url: 'https://placehold.co/1200x400/000033/FFFFFF?text=Event+1',
-            alt: 'Event 1 Banner'
-        },
-        {
-            url: 'https://placehold.co/1200x400/000033/FFFFFF?text=Event+2',
-            alt: 'Event 2 Banner'
-        },
-        {
-            url: 'https://placehold.co/1200x400/000033/FFFFFF?text=Event+3',
-            alt: 'Event 3 Banner'
-        },
-        {
-            url: 'https://placehold.co/1200x400/000033/FFFFFF?text=Event+4',
-            alt: 'Event 4 Banner'
-        },
+    const swiperRef = useRef(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [slides, setDisplaySlides] = useState([]);
+    const [originalSlides, setOriginalSlides] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAndPrepareSlides = async () => {
+            setIsLoading(true);
+            let fetchedData = [];
+            try {
+                const response = await fetch(`${getBaseUrl()}/banners/active`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch slides');
+
+                const { data } = await response.json();
+                fetchedData = data.map(slide => ({
+                    url: slide.banner,
+                    alt: slide.name || 'Banner Image',
+                    link: slide.link || '#',
+                }));
+                setOriginalSlides(fetchedData); // Store original fetched data for reference
+            } catch (error) {
+                console.error('Error fetching slides:', error);
+                setOriginalSlides([]); // Clear original slides on error
+            } finally {
+                // Determine slides to display: fetched + fallback if needed
+                let finalSlides = [...fetchedData];
+                if (finalSlides.length < MIN_LOOP_SLIDES) {
+                    const fallbackNeeded = MIN_LOOP_SLIDES - finalSlides.length;
+                    // Ensure we don't try to take more fallbacks than available if MIN_LOOP_SLIDES is large
+                    const fallbacks = getFallbackSlides().slice(0, fallbackNeeded);
+                    finalSlides = [...finalSlides, ...fallbacks];
+                }
+                setDisplaySlides(finalSlides); // Set the array for Swiper
+                setIsLoading(false);
+            }
+        };
+
+        fetchAndPrepareSlides();
+    }, []);
+
+    const getFallbackSlides = () => [
+        { url: 'https://placehold.co/1200x400/000033/FFFFFF?text=Event+1', alt: 'Event 1 Banner', link: '#' },
+        { url: 'https://placehold.co/1200x400/003300/FFFFFF?text=Event+2', alt: 'Event 2 Banner', link: '#' },
+        { url: 'https://placehold.co/1200x400/330000/FFFFFF?text=Event+3', alt: 'Event 3 Banner', link: '#' },
+        { url: 'https://placehold.co/1200x400/330033/FFFFFF?text=Event+4', alt: 'Event 4 Banner', link: '#' },
+        { url: 'https://placehold.co/1200x400/003333/FFFFFF?text=Event+5', alt: 'Event 5 Banner', link: '#' },
     ];
 
+    const handleDotClick = (index) => {
+        if (swiperRef.current) {
+            swiperRef.current.slideToLoop?.(index) || swiperRef.current.slideTo(index);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="w-full flex justify-center items-center aspect-[3/1] bg-gray-100 rounded-2xl animate-pulse">
+                <div className="text-center p-4">
+                    <span className="loading loading-spinner text-primary"></span>
+                    <p className="mt-2 text-gray-500">Loading banners...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        // Adjust the max-w if you want the carousel to take up more width in the layout.
-        // The inner Swiper styles will handle the peek effect.
-        // <div className="w-full">
+        <div className="w-full flex flex-col items-center px-4 sm:px-0" aria-label="Image carousel">
             <Swiper
-                // Install modules
-                modules={[Navigation, Pagination, Autoplay]}
-                spaceBetween={15} // Adjust space between slides (e.g., 15px)
-
-                // Key for the "peek" effect:
-                slidesPerView={1.2} // Show 1 full slide and 0.2 (20%) of the next/previous
-                centeredSlides={true} // Center the active slide, showing parts of previous and next
-                loop={true} // Essential for the peek effect to work seamlessly on first/last slides
-
-                // navigation // Enable navigation arrows
-                pagination={{ clickable: true }} // Enable pagination dots, make them clickable
+                onSwiper={(swiper) => (swiperRef.current = swiper)}
+                onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+                modules={[Navigation, Autoplay]}
+                centeredSlides={true}
+                loop={true}
                 autoplay={{
                     delay: 5000,
                     disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
                 }}
-
-                // Add breakpoints for more responsive control of slidesPerView and spaceBetween
-                // breakpoints={{
-                //     // when window width is >= 640px (sm breakpoint)
-                //     640: {
-                //         slidesPerView: 1.2,
-                //         spaceBetween: 20,
-                //     },
-                //     // when window width is >= 768px (md breakpoint)
-                //     768: {
-                //         slidesPerView: 1.3, // Maybe show a bit more of the peek on larger screens
-                //         spaceBetween: 25,
-                //     },
-                //     // when window width is >= 1024px (lg breakpoint)
-                //     1024: {
-                //         slidesPerView: 1.4, // Even more peek
-                //         spaceBetween: 30,
-                //     },
-                //     // when window width is >= 1280px (xl breakpoint)
-                //     1280: {
-                //         slidesPerView: 1.5, // 1 full slide + half of the next/previous
-                //         spaceBetween: 35,
-                //     },
-                // }}
-                className="mySwiper h-60 md:h-76 lg:h-90"
+                breakpoints={{
+                    0: {
+                        slidesPerView: 1,
+                        spaceBetween: 10,
+                    },
+                    640: {
+                        slidesPerView: 1.1,
+                        spaceBetween: 15,
+                    },
+                    768: {
+                        slidesPerView: 1.15,
+                        spaceBetween: 25,
+                    },
+                    1024: {
+                        slidesPerView: 1.25,
+                        spaceBetween: 40,
+                    },
+                }}
+                className="mySwiper rounded-2xl w-full aspect-[13/4]"
+                role="region"
+                aria-roledescription="carousel"
             >
                 {slides.map((slide, index) => (
-                    <SwiperSlide key={index}>
-                        <div
-                            style={{ backgroundImage: `url(${slide.url})` }}
-                            className="w-full h-full bg-center bg-cover flex flex-col justify-center items-center p-4 text-white text-3xl font-bold"
+                    <SwiperSlide
+                        key={index}
+                        role="group"
+                        aria-roledescription="slide"
+                        aria-label={`${index + 1} of ${slides.length}`}
+                    >
+                        <a
+                            href={slide.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full h-full block"
                             aria-label={slide.alt}
                         >
-                            {/* Content of the slide */}
-                        </div>
+                            <div className="w-full h-full flex justify-center items-center overflow-hidden rounded-xl aspect-[3/1]">
+                                <img
+                                    src={slide.url}
+                                    alt={slide.alt}
+                                    className="w-full h-full object-cover" 
+                                    loading="lazy"
+                                />
+                            </div>
+                        </a>
                     </SwiperSlide>
                 ))}
             </Swiper>
-        // </div>
+
+            {/* Pagination Dots */}
+            <div
+                className="flex justify-center mt-4 space-x-2"
+                role="tablist"
+                aria-label="Carousel navigation dots"
+            >
+                {slides.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => handleDotClick(index)}
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${activeIndex === index
+                            ? 'bg-blue-600 scale-125'
+                            : 'bg-gray-300 hover:bg-gray-400'
+                            }`}
+                        role="tab"
+                        aria-label={`Go to slide ${index + 1}`}
+                        aria-selected={activeIndex === index}
+                        aria-controls={`slide-${index}`}
+                    />
+                ))}
+            </div>
+        </div>
     );
 }
 

@@ -1,9 +1,9 @@
 import { MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const RentalProductCard = ({ imageUrl, title, price, location }) => {
+const RentalProductCard = ({ imageUrl, title, price, location, id, rental_category }) => {
     return (
-        // Removed max-w-xs from RentalProductCard itself, let the grid control width
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full">
+        <Link to={`/rentals/${rental_category}/${id}`} className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full">
             {/* Product Image */}
             <div className="h-40 overflow-hidden">
                 <img
@@ -21,7 +21,7 @@ const RentalProductCard = ({ imageUrl, title, price, location }) => {
                     <span>{location}</span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

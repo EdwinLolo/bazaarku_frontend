@@ -1,6 +1,7 @@
-const RentalCard = ({ imageUrl, title, className = '' }) => {
+import { Link } from 'react-router-dom';
+const RentalCard = ({ imageUrl, title, className = '', id }) => {
     return (
-        <div className={`relative rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full ${className}`}>
+        <Link to={`/rentals/${id}`} className={`relative rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full ${className}`}>
             <img
                 src={imageUrl}
                 alt={title}
@@ -10,7 +11,7 @@ const RentalCard = ({ imageUrl, title, className = '' }) => {
             <div className="absolute bottom-0 left-0 right-0 p-4 text-white text-xl font-bold">
                 {title}
             </div>
-        </div>
+        </Link>
     );
 };
 

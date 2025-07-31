@@ -1,8 +1,9 @@
 import { MapPin, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const EventCard = ({ imageUrl, title, location, date }) => {
+const EventCard = ({ imageUrl, title, location, date, id }) => {
     return (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full">
+        <Link to={`/events/${id}`} className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full">
             {/* Event Image */}
             <div className="h-48 overflow-hidden">
                 <img
@@ -23,7 +24,7 @@ const EventCard = ({ imageUrl, title, location, date }) => {
                     <span>{date}</span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

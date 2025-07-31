@@ -316,7 +316,7 @@ function CreateAccountPopup({ onClose, onLoginClick }) {
                 <p className="mt-1 text-xs text-red-500">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Must contain uppercase, lowercase, and number (min. 6 chars)
+                Password min. 6 chars
               </p>
             </div>
 

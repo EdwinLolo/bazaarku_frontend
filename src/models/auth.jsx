@@ -19,3 +19,16 @@ export const signup = async (
     body: JSON.stringify({ email, password, role, first_name, last_name }),
   });
 };
+
+export const getUserProfile = async () => {
+  return apiCall("/profile", {
+    method: "GET",
+  });
+};
+
+export const logout = async () => {
+  return apiCall("/logout", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+};

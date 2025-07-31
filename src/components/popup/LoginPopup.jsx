@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Add this import
-import { login } from "../../models/auth";
+import { login as loginAPI } from "../../models/auth";
+import { useAuth } from "../../App";
 
 function LoginPopup({ onClose, onRegisterClick }) {
   const navigate = useNavigate(); // Add this hook
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -70,7 +72,7 @@ function LoginPopup({ onClose, onRegisterClick }) {
     setErrors({});
 
     try {
-      const response = await login(formData.email, formData.password);
+      const response = await loginAPI(formData.email, formData.password);
 
       if (response) {
         console.log("Login successful:", response);
@@ -91,16 +93,17 @@ function LoginPopup({ onClose, onRegisterClick }) {
           localStorage.setItem("user_profile", JSON.stringify(userData2));
         }
 
-        // Close the popup
-        onClose();
+        login(response);
 
         // Navigate based on user role
-        if (response.profile.role === "admin") {
+        if (userData2?.role === "admin") {
           navigate("/admin");
         } else {
           navigate("/");
         }
 
+        // Close the popup
+        onClose();
         // Optional: Show success message
         // You can replace this with a toast notification
         console.log(`Welcome ${userData?.first_name || "User"}!`);

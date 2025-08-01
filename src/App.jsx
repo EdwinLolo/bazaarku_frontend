@@ -1,19 +1,23 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    Link,
+    createBrowserRouter,
+    RouterProvider,
+    Outlet,
     useLocation,
-    Navigate,
+    ScrollRestoration
 } from "react-router-dom";
+
+// Layouts
 import Navbar from "./layout/Navbar";
 import Footer from "./layout/Footer";
+
+// Normal pages
 import Home from "./pages/HomePage";
 import RentalsPage from "./pages/RentalsPage";
 import EventsPage from "./pages/EventsPage";
 import VendorPage from "./pages/VendorPage";
 import NotFoundPage from "./pages/NotFoundPage";
+
 // Admin imports
 import AdminLayout from "./layout/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -187,93 +191,92 @@ function AdminProtectedRoute({ children }) {
     return children;
 }
 
-function AppContent() {
+// Layout for public routes
+function PublicLayout() {
     const location = useLocation();
-
-    // Check if current path is admin route
     const isAdminRoute = location.pathname.startsWith("/admin");
 
     return (
         <>
-            {/* Show regular navbar/footer for non-admin routes */}
             {!isAdminRoute && <Navbar />}
-
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/rentals" element={<RentalsPage />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/vendor" element={<VendorPage />} />
-
-                {/* Protected Admin Routes */}
-                <Route
-                    path="/admin"
-                    element={
-                        <AdminProtectedRoute>
-                            <AdminLayout>
-                                <AdminDashboard />
-                            </AdminLayout>
-                        </AdminProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin/add-user"
-                    element={
-                        <AdminProtectedRoute>
-                            <AdminLayout>
-                                <AdminAddUser />
-                            </AdminLayout>
-                        </AdminProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin/events"
-                    element={
-                        <AdminProtectedRoute>
-                            <AdminLayout>
-                                <AdminEvent />
-                            </AdminLayout>
-                        </AdminProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin/rentals"
-                    element={
-                        <AdminProtectedRoute>
-                            <AdminLayout>
-                                <AdminRental />
-                            </AdminLayout>
-                        </AdminProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin/applications"
-                    element={
-                        <AdminProtectedRoute>
-                            <AdminLayout>
-                                <AdminAplication />
-                            </AdminLayout>
-                        </AdminProtectedRoute>
-                    }
-                />
-
-                {/* Catch-all route for 404 */}
-                <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-
-            {/* Conditional Footer */}
+            <Outlet />
+            <ScrollRestoration />
             {!isAdminRoute && <Footer />}
         </>
     );
 }
 
+// Admin Layout Wrapper
+function AdminLayoutWrapper() {
+    return (
+        <AdminProtectedRoute>
+            <AdminLayout>
+                <Outlet />
+            </AdminLayout>
+        </AdminProtectedRoute>
+    );
+}
+
+// Router configuration
+const router = createBrowserRouter([
+    {
+        element: <PublicLayout />,
+        children: [
+            {
+                path: "/",
+                element: <Home />
+            },
+            {
+                path: "/rentals",
+                element: <RentalsPage />
+            },
+            {
+                path: "/events",
+                element: <EventsPage />
+            },
+            {
+                path: "/vendor",
+                element: <VendorPage />
+            },
+            {
+                path: "/admin",
+                element: <AdminLayoutWrapper />,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminDashboard />
+                    },
+                    {
+                        path: "add-user",
+                        element: <AdminAddUser />
+                    },
+                    {
+                        path: "events",
+                        element: <AdminEvent />
+                    },
+                    {
+                        path: "rentals",
+                        element: <AdminRental />
+                    },
+                    {
+                        path: "applications",
+                        element: <AdminAplication />
+                    }
+                ]
+            },
+            {
+                path: "*",
+                element: <NotFoundPage />
+            }
+        ]
+    }
+]);
+
 function App() {
     return (
-        <Router>
-            <AuthProvider>
-                <AppContent />
-            </AuthProvider>
-        </Router>
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
     );
 }
 

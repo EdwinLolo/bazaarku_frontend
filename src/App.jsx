@@ -17,6 +17,7 @@ import RentalsPage from "./pages/RentalsPage";
 import EventsPage from "./pages/EventsPage";
 import VendorPage from "./pages/VendorPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import EventDetailPage from "./pages/EventDetailPage";
 
 // Admin imports
 import AdminLayout from "./layout/AdminLayout";
@@ -235,7 +236,11 @@ const router = createBrowserRouter([
                 element: <EventsPage />
             },
             {
-                path: "/vendor",
+                path: "/events/:id",
+                element: <EventDetailPage />
+            },
+            {
+                path: "/vendor/:id",
                 element: <VendorPage />
             },
             {

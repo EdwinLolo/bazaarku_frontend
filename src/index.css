@@ -2,7 +2,7 @@
 /* @custom-variant dark (&:where(.dark, .dark *)); */
 
 body {
-    background-color: #F7F7F7;
+    background-color: white;
 }
 
 /* Custom CSS for the application */

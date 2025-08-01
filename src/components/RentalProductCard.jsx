@@ -1,27 +1,77 @@
-import { MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { MapPin, Tag, Clock, CheckCircle } from "lucide-react";
 
-const RentalProductCard = ({ imageUrl, title, price, location, id, className = '', rental_category }) => {
+const RentalProductCard = ({ imageUrl, title, price, location, className = '', rental_category, description, isReady }) => {
     return (
-        <Link to={`/rentals/${rental_category}/${id}`} className={`bg-white rounded-xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 w-full ${className}`}>
-            {/* Product Image */}
-            <div className="h-40 overflow-hidden">
+        <div
+            className={`relative rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm
+                hover:shadow-lg hover:ring-1 hover:ring-primary-500/30 transition-all duration-300 group
+                flex flex-col h-full ${className}`}
+        >
+            {/* Readiness Badge - Modern floating design */}
+            <div className="absolute top-4 left-4 z-10">
+                <span
+                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm
+                        ${isReady
+                            ? 'bg-green-500/10 text-green-800 border border-green-200'
+                            : 'bg-amber-500/10 text-amber-800 border border-amber-200'}`}
+                >
+                    {isReady ? <CheckCircle size={14} className="text-green-600" /> : <Clock size={14} className="text-amber-600" />}
+                    <span className="mt-0.5">{isReady ? "Available Now" : "Reserved"}</span>
+                </span>
+            </div>
+
+            {/* Image Section with gradient overlay */}
+            <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                 <img
                     src={imageUrl}
                     alt={title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
                 />
+                {/* Gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            {/* Product Details */}
-            <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
-                <p className="text-xl font-bold text-gray-900 mb-2">{price}</p>
-                <div className="flex items-center text-gray-600 text-sm">
-                    <MapPin className="h-4 w-4 mr-1 text-gray-500" />
-                    <span>{location}</span>
+
+            {/* Content Section */}
+            <div className="p-4 pt-3.5 flex flex-col flex-grow gap-3">
+                {/* <div className="flex-grow"> */}
+                    {/* Title with fade effect */}
+                    <h3 className="text-lg font-semibold text-gray-900 leading-tight line-clamp-2">
+                        {title}
+                    </h3>
+
+                    {/* Category tag - subtle design */}
+                    {/* <div className="mt-2 flex items-center gap-1.5">
+                        <Tag size={14} className="text-gray-400" />
+                        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                            {rental_category}
+                        </span>
+                    </div> */}
+                {/* </div> */}
+
+                <div className="">
+                    {/* Price - with emphasized styling */}
+                    <div className="flex items-end justify-between">
+                        <div className="text-xl font-bold text-gray-900">
+                            {price.toLocaleString('id-ID', {
+                                style: 'currency',
+                                currency: 'IDR',
+                                minimumFractionDigits: 0
+                            })}
+                        </div>
+                        <div className="text-xs font-medium text-gray-500"></div>
+                    </div>
+
+                    {/* Location - with subtle icon */}
+                    <div className="mt-3 flex items-center text-sm text-gray-600 gap-2 border-t border-gray-100 pt-3">
+                        <MapPin size={16} className="text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{location}</span>
+                    </div>
                 </div>
             </div>
-        </Link>
+
+            {/* Hover action indicator */}
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-400 to-primary-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
     );
 };
 

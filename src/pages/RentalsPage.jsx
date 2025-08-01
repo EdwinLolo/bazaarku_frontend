@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RentalProductCard from '../components/RentalProductCard';
+import RentalProductPopup from '../components/popup/RentalProductPopup';
 import { getBaseUrl } from "../models/utils";
 import TempImage from '../assets/Audio Control Panel.png';
 import Loading from '../components/Loading';
@@ -7,6 +8,27 @@ import Loading from '../components/Loading';
 function RentalsPage() {
     const [rentals, setRentals] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
+
+    useEffect(() => {
+        const originalStyle = window.getComputedStyle(document.body).overflow;
+
+        if (showPopup) {
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+            document.body.style.overflow = 'hidden';
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
+        } else {
+            document.body.style.overflow = originalStyle;
+            document.body.style.paddingRight = '0px';
+        }
+
+        return () => {
+            document.body.style.overflow = originalStyle;
+            document.body.style.paddingRight = '0px';
+        };
+    }, [showPopup]);
 
     useEffect(() => {
         const fetchRentals = async () => {
@@ -22,7 +44,6 @@ function RentalsPage() {
                     console.error("API response for rentals does not contain a data array:", responseData);
                     setRentals([]);
                 }
-                console.log("Fetched rentals:", responseData.data);
             } catch (error) {
                 console.error("Error fetching rentals:", error);
                 setRentals([]);
@@ -62,12 +83,16 @@ function RentalsPage() {
                                 rental.rental_products.map((product) => (
                                     <RentalProductCard
                                         key={product.id}
-                                        imageUrl={product.banner || TempImage} // Added fallback image
+                                        imageUrl={product.banner || TempImage}
                                         title={product.name}
                                         price={product.price}
                                         location={product.location}
                                         id={product.id}
-                                        isReady={product.is_ready} // This is the new prop
+                                        isReady={product.is_ready}
+                                        onClick={() => {
+                                            setSelectedProduct(product);
+                                            setShowPopup(true);
+                                        }}
                                     />
                                 ))
                             ) : (
@@ -78,6 +103,13 @@ function RentalsPage() {
                 ))
             ) : (
                 <p className="text-center text-lg mt-10">No rentals found.</p>
+            )}
+
+            {showPopup && (
+                <RentalProductPopup
+                    product={selectedProduct}
+                    onClose={() => setShowPopup(false)}
+                />
             )}
         </div >
     );

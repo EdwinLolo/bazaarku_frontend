@@ -13,7 +13,7 @@ const RentalProductPopup = ({ product, onClose }) => {
         : 'Price not available';
 
     const whatsappMessage = `Hello, I'm interested in the product ${product?.name} (${formattedPrice}) you have for rent. May I ask for more details?`;
-    const whatsappUrl = `https://wa.me/6287809290500?text=${encodeURIComponent(
+    const whatsappUrl = `https://wa.me/${product.contact}?text=${encodeURIComponent(
         whatsappMessage
     )}`;
 

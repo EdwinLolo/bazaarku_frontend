@@ -1,4 +1,4 @@
-// src/components/admin/EventCategoryTab.jsx
+// src/components/admin/RentalCategoryTab.jsx
 import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
@@ -9,28 +9,25 @@ import {
   DialogActions,
   TextField,
   IconButton,
+  MenuItem,
   Chip,
 } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import { Edit, Delete } from "@mui/icons-material";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
-import {
-  getEventData,
-  createEventCategory,
-  updateEventCategory,
-  deleteEventCategory,
-} from "../models/admin";
 
-function EventCategoryTab() {
+function RentalCategoryTab() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
+    description: "",
+    color: "#3B82F6",
+    status: "active",
   });
 
-  // Mock data - replace with actual API calls
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -39,9 +36,37 @@ function EventCategoryTab() {
     setLoading(true);
     try {
       // Replace with actual API call
-      const mockData = await getEventData();
-      console.log("Fetched categories:", mockData);
-      setCategories(mockData.data);
+      const mockData = [
+        {
+          id: 1,
+          name: "Audio Equipment",
+          description: "Microphones, speakers, sound systems",
+          color: "#EF4444",
+          status: "active",
+        },
+        {
+          id: 2,
+          name: "Furniture",
+          description: "Tables, chairs, tents, decorations",
+          color: "#F59E0B",
+          status: "active",
+        },
+        {
+          id: 3,
+          name: "Lighting",
+          description: "Stage lights, LED panels, spotlights",
+          color: "#8B5CF6",
+          status: "active",
+        },
+        {
+          id: 4,
+          name: "Catering Equipment",
+          description: "Food warmers, serving equipment",
+          color: "#10B981",
+          status: "inactive",
+        },
+      ];
+      setCategories(mockData);
     } catch (error) {
       console.error("Error fetching categories:", error);
     } finally {
@@ -51,7 +76,12 @@ function EventCategoryTab() {
 
   const handleAdd = () => {
     setEditingCategory(null);
-    setFormData({ name: "", description: "", color: "#3B82F6" });
+    setFormData({
+      name: "",
+      description: "",
+      color: "#3B82F6",
+      status: "active",
+    });
     setDialogOpen(true);
   };
 
@@ -74,7 +104,6 @@ function EventCategoryTab() {
 
     if (result.isConfirmed) {
       try {
-        await deleteEventCategory(id);
         setCategories((prev) => prev.filter((cat) => cat.id !== id));
         Swal.fire("Deleted!", "Category has been deleted.", "success");
       } catch (error) {
@@ -86,8 +115,6 @@ function EventCategoryTab() {
   const handleSubmit = async () => {
     try {
       if (editingCategory) {
-        // Update existing
-        await updateEventCategory(editingCategory.id, formData);
         setCategories((prev) =>
           prev.map((cat) =>
             cat.id === editingCategory.id ? { ...cat, ...formData } : cat
@@ -95,9 +122,7 @@ function EventCategoryTab() {
         );
         Swal.fire("Updated!", "Category updated successfully.", "success");
       } else {
-        // Add new
-        const submitResponse = await createEventCategory(formData);
-        const newCategory = { ...formData, id: submitResponse.data.id }; // Mock ID, replace with actual response ID
+        const newCategory = { ...formData, id: Date.now() };
         setCategories((prev) => [...prev, newCategory]);
         Swal.fire("Added!", "Category added successfully.", "success");
       }
@@ -109,7 +134,33 @@ function EventCategoryTab() {
 
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Name", width: 200 },
+    { field: "name", headerName: "Category Name", width: 200 },
+    { field: "description", headerName: "Description", width: 300 },
+    {
+      field: "color",
+      headerName: "Color",
+      width: 100,
+      renderCell: (params) => (
+        <div className="flex items-center space-x-2">
+          <div
+            className="w-6 h-6 border border-gray-300 rounded-full"
+            style={{ backgroundColor: params.value }}
+          />
+        </div>
+      ),
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={params.value === "active" ? "success" : "default"}
+          size="small"
+        />
+      ),
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -140,10 +191,10 @@ function EventCategoryTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">
-            Event Categories
+            Rental Categories
           </h2>
           <p className="text-sm text-gray-600">
-            Manage event categories and types
+            Manage rental item categories and types
           </p>
         </div>
         <button
@@ -186,6 +237,40 @@ function EventCategoryTab() {
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             margin="normal"
           />
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            margin="normal"
+          />
+          <div className="flex items-center space-x-3">
+            <label className="text-sm font-medium text-gray-700">Color:</label>
+            <input
+              type="color"
+              value={formData.color}
+              onChange={(e) =>
+                setFormData({ ...formData, color: e.target.value })
+              }
+              className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+            />
+          </div>
+          <TextField
+            label="Status"
+            fullWidth
+            select
+            value={formData.status}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value })
+            }
+            margin="normal">
+            <MenuItem value="active">Active</MenuItem>
+            <MenuItem value="inactive">Inactive</MenuItem>
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
@@ -198,4 +283,4 @@ function EventCategoryTab() {
   );
 }
 
-export default EventCategoryTab;
+export default RentalCategoryTab;

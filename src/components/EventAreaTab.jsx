@@ -14,6 +14,12 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
+import {
+  getAreaData,
+  createArea,
+  updateArea,
+  deleteArea,
+} from "../models/admin";
 
 function EventAreaTab() {
   const [areas, setAreas] = useState([]);
@@ -22,10 +28,6 @@ function EventAreaTab() {
   const [editingArea, setEditingArea] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
-    location: "",
-    capacity: "",
-    description: "",
-    status: "active",
   });
 
   useEffect(() => {
@@ -36,33 +38,8 @@ function EventAreaTab() {
     setLoading(true);
     try {
       // Replace with actual API call
-      const mockData = [
-        {
-          id: 1,
-          name: "Main Hall",
-          location: "Building A, Floor 1",
-          capacity: 500,
-          description: "Large event space",
-          status: "active",
-        },
-        {
-          id: 2,
-          name: "Outdoor Plaza",
-          location: "Outside Building B",
-          capacity: 1000,
-          description: "Open air venue",
-          status: "active",
-        },
-        {
-          id: 3,
-          name: "Conference Room",
-          location: "Building C, Floor 2",
-          capacity: 100,
-          description: "Small meeting space",
-          status: "maintenance",
-        },
-      ];
-      setAreas(mockData);
+      const mockData = await getAreaData();
+      setAreas(mockData.data);
     } catch (error) {
       console.error("Error fetching areas:", error);
     } finally {
@@ -74,10 +51,6 @@ function EventAreaTab() {
     setEditingArea(null);
     setFormData({
       name: "",
-      location: "",
-      capacity: "",
-      description: "",
-      status: "active",
     });
     setDialogOpen(true);
   };
@@ -101,6 +74,7 @@ function EventAreaTab() {
 
     if (result.isConfirmed) {
       try {
+        await deleteArea(id);
         setAreas((prev) => prev.filter((area) => area.id !== id));
         Swal.fire("Deleted!", "Area has been deleted.", "success");
       } catch (error) {
@@ -112,6 +86,7 @@ function EventAreaTab() {
   const handleSubmit = async () => {
     try {
       if (editingArea) {
+        await updateArea(editingArea.id, formData);
         setAreas((prev) =>
           prev.map((area) =>
             area.id === editingArea.id ? { ...area, ...formData } : area
@@ -119,9 +94,10 @@ function EventAreaTab() {
         );
         Swal.fire("Updated!", "Area updated successfully.", "success");
       } else {
+        const areaResponse = await createArea(formData);
         const newArea = {
           ...formData,
-          id: Date.now(),
+          id: areaResponse.data.id,
           capacity: parseInt(formData.capacity),
         };
         setAreas((prev) => [...prev, newArea]);
@@ -136,24 +112,6 @@ function EventAreaTab() {
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "name", headerName: "Area Name", width: 200 },
-    { field: "location", headerName: "Location", width: 250 },
-    { field: "capacity", headerName: "Capacity", width: 120, type: "number" },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 120,
-      renderCell: (params) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            params.value === "active"
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-100 text-yellow-800"
-          }`}>
-          {params.value}
-        </span>
-      ),
-    },
-    { field: "description", headerName: "Description", width: 200 },
     {
       field: "actions",
       headerName: "Actions",
@@ -221,49 +179,6 @@ function EventAreaTab() {
             fullWidth
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            margin="normal"
-          />
-          <TextField
-            label="Location"
-            fullWidth
-            value={formData.location}
-            onChange={(e) =>
-              setFormData({ ...formData, location: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            label="Capacity"
-            fullWidth
-            type="number"
-            value={formData.capacity}
-            onChange={(e) =>
-              setFormData({ ...formData, capacity: e.target.value })
-            }
-            margin="normal"
-          />
-          <TextField
-            label="Status"
-            fullWidth
-            select
-            value={formData.status}
-            onChange={(e) =>
-              setFormData({ ...formData, status: e.target.value })
-            }
-            margin="normal">
-            <MenuItem value="active">Active</MenuItem>
-            <MenuItem value="maintenance">Maintenance</MenuItem>
-            <MenuItem value="inactive">Inactive</MenuItem>
-          </TextField>
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            rows={3}
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
             margin="normal"
           />
         </DialogContent>

@@ -142,3 +142,90 @@ export const getEventVendors = async () => {
     method: "GET",
   });
 };
+
+// In models/admin.js
+export const createEventVendor = async (vendorData) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  // Check if vendorData is FormData (for file uploads) or regular object
+  const isFormData = vendorData instanceof FormData;
+
+  const options = {
+    method: "POST",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      // Don't set Content-Type for FormData - let browser handle it
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? vendorData : JSON.stringify(vendorData),
+  };
+
+  const response = await fetch(`${baseURL}/vendors`, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create vendor");
+  }
+
+  return await response.json();
+};
+
+export const updateEventVendor = async (vendorId, vendorData) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  // Check if vendorData is FormData (for file uploads) or regular object
+  const isFormData = vendorData instanceof FormData;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      // Don't set Content-Type for FormData - let browser handle it
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? vendorData : JSON.stringify(vendorData),
+  };
+
+  const response = await fetch(`${baseURL}/vendors/${vendorId}`, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update vendor");
+  }
+
+  return await response.json();
+};
+
+export const deleteEventVendor = async (vendorId) => {
+  return apiCall(`/vendors/${vendorId}`, {
+    method: "DELETE",
+  });
+};
+
+export const getBooth = async () => {
+  return apiCall("/booths", {
+    method: "GET",
+  });
+};
+
+export const updateBooth = async (boothId, boothData) => {
+  return apiCall(`/booths/${boothId}/status`, {
+    method: "PUT",
+    body: JSON.stringify(boothData),
+  });
+};
+
+export const createBooth = async (boothData) => {
+  return apiCall("/booths", {
+    method: "POST",
+    body: JSON.stringify(boothData),
+  });
+};
+
+export const deleteBooth = async (boothId) => {
+  return apiCall(`/booths/${boothId}`, {
+    method: "DELETE",
+  });
+};

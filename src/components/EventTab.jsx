@@ -30,6 +30,8 @@ import {
   Close,
   Download,
   OpenInNew,
+  Check as CheckIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
@@ -41,6 +43,7 @@ import {
   getAreaData,
   getEventData,
   getEventVendors,
+  updateBooth,
 } from "../models/admin";
 
 function EventTab() {
@@ -113,6 +116,170 @@ function EventTab() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Add these functions in your EventTab component
+  const handleBoothStatusUpdate = async (
+    applicationId,
+    newStatus,
+    applicationName
+  ) => {
+    try {
+      const result = await Swal.fire({
+        title: `${
+          newStatus === "APPROVED" ? "Approve" : "Reject"
+        } Application?`,
+        text: `Are you sure you want to ${newStatus.toLowerCase()} "${applicationName}"?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: newStatus === "APPROVED" ? "#10B981" : "#EF4444",
+        cancelButtonColor: "#6B7280",
+        confirmButtonText: `Yes, ${newStatus.toLowerCase()} it!`,
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        // Show loading
+        Swal.fire({
+          title: "Updating...",
+          text: "Please wait while we update the application status.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        // Update the booth status
+        await updateBooth(applicationId, { is_acc: newStatus });
+
+        // Close loading and show success
+        Swal.close();
+
+        // Update the local state to reflect the change
+        setSelectedEventBooths((prev) => {
+          if (!prev?.booth?.applications) return prev;
+
+          const updatedApplications = prev.booth.applications.map((app) =>
+            app.id === applicationId ? { ...app, is_acc: newStatus } : app
+          );
+
+          // Recalculate statistics
+          const newStats = {
+            total: updatedApplications.length,
+            pending: updatedApplications.filter(
+              (app) => app.is_acc === "PENDING"
+            ).length,
+            approved: updatedApplications.filter(
+              (app) => app.is_acc === "APPROVED"
+            ).length,
+            rejected: updatedApplications.filter(
+              (app) => app.is_acc === "REJECTED"
+            ).length,
+          };
+
+          return {
+            ...prev,
+            booth: {
+              ...prev.booth,
+              applications: updatedApplications,
+              statistics: newStats,
+              count: updatedApplications.length,
+            },
+          };
+        });
+
+        // Also update the main events list to reflect changes
+        setEvents((prev) =>
+          prev.map((event) => {
+            if (event.id === selectedEventBooths.id) {
+              const updatedApplications = event.booth.applications.map((app) =>
+                app.id === applicationId ? { ...app, is_acc: newStatus } : app
+              );
+
+              const newStats = {
+                total: updatedApplications.length,
+                pending: updatedApplications.filter(
+                  (app) => app.is_acc === "PENDING"
+                ).length,
+                approved: updatedApplications.filter(
+                  (app) => app.is_acc === "APPROVED"
+                ).length,
+                rejected: updatedApplications.filter(
+                  (app) => app.is_acc === "REJECTED"
+                ).length,
+              };
+
+              return {
+                ...event,
+                booth: {
+                  ...event.booth,
+                  applications: updatedApplications,
+                  statistics: newStats,
+                  count: updatedApplications.length,
+                },
+              };
+            }
+            return event;
+          })
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: `Application has been ${newStatus.toLowerCase()} successfully.`,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      }
+      setBoothDialogOpen(true);
+    } catch (error) {
+      console.error("Error updating booth status:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text:
+          error.message ||
+          "Failed to update application status. Please try again.",
+      });
+    }
+  };
+
+  const handleApproveApplication = (applicationId, applicationName) => {
+    setBoothDialogOpen(false);
+    handleBoothStatusUpdate(applicationId, "APPROVED", applicationName);
+  };
+
+  const handleRejectApplication = (applicationId, applicationName) => {
+    setBoothDialogOpen(false);
+    handleBoothStatusUpdate(applicationId, "REJECTED", applicationName);
+  };
+
+  const handleViewApplicationDetails = (application) => {
+    Swal.fire({
+      title: "Application Details",
+      html: `
+      <div style="text-align: left; margin: 20px 0;">
+        <p><strong>ID:</strong> ${application.id}</p>
+        <p><strong>Booth Name:</strong> ${application.name}</p>
+        <p><strong>Phone:</strong> ${
+          application.phone ? `+${application.phone}` : "No phone provided"
+        }</p>
+        <p><strong>Status:</strong> <span style="color: ${
+          application.is_acc === "APPROVED"
+            ? "#10B981"
+            : application.is_acc === "REJECTED"
+            ? "#EF4444"
+            : "#F59E0B"
+        };">${application.is_acc || "PENDING"}</span></p>
+        <p><strong>Description:</strong></p>
+        <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-top: 8px;">
+          ${application.desc || "No description provided"}
+        </div>
+      </div>
+    `,
+      confirmButtonText: "Close",
+      width: "500px",
+    });
   };
 
   const handleAdd = () => {
@@ -1096,34 +1263,45 @@ function EventTab() {
                                 size="small"
                                 color="success"
                                 variant="outlined"
-                                onClick={() => {
-                                  console.log(
-                                    "Approve application:",
-                                    application.id
-                                  );
-                                }}>
+                                onClick={() =>
+                                  handleApproveApplication(
+                                    application.id,
+                                    application.name
+                                  )
+                                }
+                                startIcon={<CheckIcon />}>
                                 Approve
                               </Button>
                               <Button
                                 size="small"
                                 color="error"
                                 variant="outlined"
-                                onClick={() => {
-                                  console.log(
-                                    "Reject application:",
-                                    application.id
-                                  );
-                                }}>
+                                onClick={() =>
+                                  handleRejectApplication(
+                                    application.id,
+                                    application.name
+                                  )
+                                }
+                                startIcon={<CloseIcon />}>
                                 Reject
                               </Button>
                             </>
                           )}
+                          {application.is_acc !== "PENDING" && (
+                            <Chip
+                              label={`${application.is_acc} ✓`}
+                              color={getBoothStatusColor(application.is_acc)}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
                           <IconButton
                             size="small"
                             color="primary"
-                            onClick={() => {
-                              console.log("View details:", application);
-                            }}>
+                            onClick={() =>
+                              handleViewApplicationDetails(application)
+                            }
+                            title="View Details">
                             <Visibility />
                           </IconButton>
                         </div>

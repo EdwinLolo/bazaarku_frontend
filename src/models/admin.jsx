@@ -1,6 +1,6 @@
 import { apiCall } from "./utils";
 
-export const getAdminDashboardData = async () => {
+export const getUserData = async () => {
   return apiCall("/admin/users", {
     method: "GET",
   });
@@ -16,5 +16,11 @@ export const updateUser = async (userId, userData) => {
 export const deleteUser = async (userId) => {
   return apiCall(`/admin/users/${userId}`, {
     method: "DELETE",
+  });
+};
+
+export const getEventData = async () => {
+  return apiCall("/event-categories/with-count", {
+    method: "GET",
   });
 };

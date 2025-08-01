@@ -18,11 +18,7 @@ import {
 } from "@mui/material";
 import { Edit, Delete, Co2Sharp } from "@mui/icons-material";
 import { Plus, UserPlus, Users } from "lucide-react";
-import {
-  getAdminDashboardData,
-  updateUser,
-  deleteUser,
-} from "../../models/admin";
+import { getUserData, updateUser, deleteUser } from "../../models/admin";
 import { signup } from "../../models/auth";
 import Loading from "../../components/Loading";
 import Swal from "sweetalert2";
@@ -130,7 +126,7 @@ export default function AdminAddUser() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAdminDashboardData();
+      const data = await getUserData();
       console.log("Admin dashboard data:", data);
 
       const transformedData = data.map((item, index) => {

@@ -240,7 +240,7 @@ const router = createBrowserRouter([
                 element: <EventDetailPage />
             },
             {
-                path: "/vendor/:id",
+                path: "/vendors/:id",
                 element: <VendorPage />
             },
             {

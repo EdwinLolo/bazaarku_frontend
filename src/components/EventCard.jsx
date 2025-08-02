@@ -10,7 +10,7 @@ const EventCard = ({ imageUrl, name, location, start_date, end_date , id }) => {
     return (
         <Link
             to={`/events/${id}`}
-            className="group relative w-full h-92 rounded-3xl overflow-hidden shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:shadow-blue-400/50"
+            className="group relative w-full h-92 rounded-3xl overflow-hidden shadow-2xl border-2 border-blue-100/80 transition-all duration-500 hover:scale-[1.02] hover:shadow-blue-400/50"
         >
             <img
                 src={imageUrl}

@@ -15,11 +15,11 @@ const VendorCard = ({ imageUrl, name, location, id }) => {
                     alt={name}
                     className="w-full h-full object-cover transition-all duration-500 grayscale group-hover:grayscale-0"
                 />
-
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent"></div>
             </div>
-
-            <div className="absolute bottom-0 inset-x-0 p-6 text-white transition-all duration-300 transform md:translate-y-full md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+            
+            <div className="absolute bottom-0 inset-x-0 p-6 text-white transition-all duration-300 transform md:translate-y-full md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100
+                        bg-gradient-to-t from-transparent via-black/50 to-black/90">
                 <h3 className="text-3xl font-extrabold mb-1 tracking-tight drop-shadow-lg">
                     {capitalizeFirst(name)}
                 </h3>

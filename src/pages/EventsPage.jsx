@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { getBaseUrl } from "../models/utils";
-import TempImage from '../assets/Audio Control Panel.png';
 import EventCard from "../components/EventCard";
 import VendorCard from "../components/VendorCard";
 import { ChevronDown, MapPin, Briefcase } from "lucide-react";
 import Loading from "../components/Loading";
+import TempImage from "../assets/Audio Control Panel.png";
 
 function EventsPage() {
     // State for Events
@@ -64,7 +64,7 @@ function EventsPage() {
     // Fetch Events when eventPage, eventLimit, or a filter changes
     useEffect(() => {
         const fetchEvents = async () => {
-            setLoadingEvents(true);
+            setLoadingEvents(true); // Set loading to true at the start of the fetch
             try {
                 const filterParams = new URLSearchParams();
                 filterParams.append('page', eventPage);
@@ -93,7 +93,7 @@ function EventsPage() {
                 console.error("Error fetching events:", error);
                 setEvents([]);
             } finally {
-                setLoadingEvents(false);
+                setLoadingEvents(false); // Set loading to false when fetch is complete
             }
         };
         fetchEvents();
@@ -102,7 +102,7 @@ function EventsPage() {
     // Fetch Vendors when vendorPage or vendorLimit changes
     useEffect(() => {
         const fetchVendors = async () => {
-            setLoadingVendors(true);
+            setLoadingVendors(true); // Set loading to true at the start of the fetch
             try {
                 const response = await fetch(`${getBaseUrl()}/vendors?page=${vendorPage}&limit=${vendorLimit}`);
                 if (!response.ok) {
@@ -121,7 +121,7 @@ function EventsPage() {
                 console.error("Error fetching vendors:", error);
                 setVendors([]);
             } finally {
-                setLoadingVendors(false);
+                setLoadingVendors(false); // Set loading to false when fetch is complete
             }
         };
         fetchVendors();
@@ -154,8 +154,9 @@ function EventsPage() {
         );
     };
 
-    if (loadingEvents || loadingVendors || loadingFilters) {
-        return <Loading message="Loading data..." />;
+    // Full-page initial loading state
+    if (loadingFilters) {
+        return <Loading message="Loading filter options..." />;
     }
 
     return (
@@ -243,7 +244,10 @@ function EventsPage() {
                     </div>
                 </div>
                 {loadingEvents ? (
-                    <Loading message="Loading events..." />
+                    <div className="flex flex-col items-center justify-center min-h-84">
+                        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-800"></div>
+                        <p className="mt-4 text-lg font-bold text-primary">Loading Events...</p>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                         {events.length > 0 ? (
@@ -253,7 +257,7 @@ function EventsPage() {
                                     key={event.id}
                                     imageUrl={event.banner}
                                     name={event.name}
-                                    location={event.location} 
+                                    location={event.location}
                                     start_date={event.start_date}
                                     end_date={event.end_date}
                                 />

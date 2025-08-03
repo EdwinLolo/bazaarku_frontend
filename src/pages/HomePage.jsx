@@ -115,7 +115,7 @@ function Home() {
                         events.map(event => (
                             <EventCard
                                 key={event.id}
-                                imageUrl={TempImage}
+                                imageUrl={event.banner || TempImage}
                                 name={event.name}
                                 location={event.location}
                                 start_date={event.start_date}
@@ -157,7 +157,7 @@ function Home() {
                             return (
                                 <RentalCard
                                     key={rental.id}
-                                    imageUrl={TempImage}
+                                    imageUrl={rental.banner || TempImage}
                                     title={rental.name}
                                     className={`h-56 sm:h-64 md:h-72 ${colSpanClass}`}
                                     id={rental.id}

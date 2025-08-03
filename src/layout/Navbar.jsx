@@ -58,7 +58,7 @@ const Navbar = () => {
         <>
             {/* <header className="font-sans text-white shadow-md bg-primary sticky top-0 z-50"> */}
             <header className="font-sans text-white shadow-md bg-primary">
-                <div className="container px-8 mx-auto">
+                <div className="container mx-auto">
                     <div className="flex items-center justify-between h-20">
                         {/* Left Section: Logo and Nav Links */}
                         <div className="flex items-center space-x-8">

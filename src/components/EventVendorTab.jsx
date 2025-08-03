@@ -119,6 +119,8 @@ function EventVendorTab() {
   // Handle banner file upload
   const handleBannerFileChange = async (e) => {
     const file = e.target.files[0];
+    console.log("File selected:", file);
+
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
         Swal.fire({
@@ -141,16 +143,18 @@ function EventVendorTab() {
         });
 
         const compressedFile = await compressImage(file);
+        console.log("Compressed file:", compressedFile);
 
-        setFormData({
-          ...formData,
+        setFormData((prev) => ({
+          ...prev,
           banner_file: compressedFile,
-          banner: "",
-          remove_banner: false,
-        });
+          banner: "", // Clear banner URL when file is selected
+          remove_banner: editingVendor && editingVendor.banner ? true : false, // Set to true if replacing existing banner
+        }));
 
         Swal.close();
       } catch (error) {
+        console.error("Compression error:", error);
         Swal.fire({
           icon: "error",
           title: "Compression Failed",
@@ -279,18 +283,45 @@ function EventVendorTab() {
           insta: safeStringTrim(formData.insta),
           location: safeStringTrim(formData.location),
           user_id: formData.user_id,
-          remove_banner: formData.remove_banner ? "true" : "false",
         };
 
-        // Add banner URL only if provided and no file upload
-        if (!hasBannerFile && hasBannerUrl) {
+        // Handle banner logic
+        if (hasBannerFile) {
+          // If uploading a new file, remove the old banner
+          fieldsToAdd.remove_banner = "true";
+          console.log(
+            "Setting remove_banner to true because new file is being uploaded"
+          );
+        } else if (formData.remove_banner) {
+          // If explicitly removing banner
+          fieldsToAdd.remove_banner = "true";
+          console.log(
+            "Setting remove_banner to true because user explicitly removed banner"
+          );
+        } else if (hasBannerUrl) {
+          // If updating with URL
           fieldsToAdd.banner = safeStringTrim(formData.banner);
+          fieldsToAdd.remove_banner = "false";
+          console.log("Setting banner URL and remove_banner to false");
+        } else {
+          // Keep existing banner
+          fieldsToAdd.remove_banner = "false";
+          console.log("Keeping existing banner, remove_banner set to false");
         }
 
-        // Append all fields to FormData (only non-empty values)
+        console.log("Banner logic:", {
+          hasBannerFile,
+          hasBannerUrl,
+          formDataRemoveBanner: formData.remove_banner,
+          finalRemoveBanner: fieldsToAdd.remove_banner,
+          existingBanner: editingVendor.banner,
+        });
+
+        // Append all fields to FormData
         Object.entries(fieldsToAdd).forEach(([key, value]) => {
           if (value !== null && value !== undefined && value !== "") {
             formDataToSend.append(key, value);
+            console.log(`Added to FormData: ${key} = ${value}`);
           }
         });
 
@@ -298,6 +329,7 @@ function EventVendorTab() {
         if (hasBannerFile) {
           formDataToSend.append("banner_image", formData.banner_file);
           console.log("Added file to FormData:", {
+            fieldName: "banner_image",
             name: formData.banner_file.name,
             size: formData.banner_file.size,
             type: formData.banner_file.type,
@@ -372,6 +404,21 @@ function EventVendorTab() {
     } catch (error) {
       console.error("Submit error:", error);
       Swal.fire("Error!", error.message || "Failed to save vendor.", "error");
+    }
+  };
+
+  // Add this function to clear the selected file
+  const handleRemoveFile = () => {
+    setFormData((prev) => ({
+      ...prev,
+      banner_file: null,
+      remove_banner: false, // Reset remove_banner when removing file selection
+    }));
+
+    // Clear the file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = "";
     }
   };
 
@@ -685,7 +732,8 @@ function EventVendorTab() {
               {/* Banner URL Input */}
               {(!editingVendor ||
                 !formData.banner ||
-                formData.remove_banner) && (
+                formData.remove_banner ||
+                !formData.banner_file) && (
                 <TextField
                   label="Banner URL"
                   fullWidth
@@ -714,12 +762,32 @@ function EventVendorTab() {
                 accept="image/*"
                 onChange={handleBannerFileChange}
                 style={{ marginTop: 8 }}
+                key={editingVendor?.id || "new"} // Add this to reset file input
               />
               {formData.banner_file && (
-                <Typography variant="body2" color="primary" mt={1}>
-                  File selected: {formData.banner_file.name}(
-                  {(formData.banner_file.size / 1024 / 1024).toFixed(2)} MB)
-                </Typography>
+                <Box mt={1} p={2} border="1px solid #2196f3" borderRadius={1}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Typography variant="body2" color="primary">
+                        New file selected: {formData.banner_file.name}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        Size:{" "}
+                        {(formData.banner_file.size / 1024 / 1024).toFixed(2)}{" "}
+                        MB
+                        {editingVendor &&
+                          editingVendor.banner &&
+                          " (will replace current banner)"}
+                      </Typography>
+                    </div>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={handleRemoveFile}>
+                      Remove File
+                    </Button>
+                  </div>
+                </Box>
               )}
             </div>
           </div>

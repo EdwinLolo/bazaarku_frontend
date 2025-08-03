@@ -4,6 +4,7 @@ import { MapPin, Calendar, Users, Store, Phone } from "lucide-react";
 import { FaWhatsapp } from 'react-icons/fa';
 import { getBaseUrl } from "../models/utils";
 import Loading from "../components/Loading";
+import { Alert } from "@mui/material";
 
 const EventDetailPage = () => {
     const { id } = useParams();
@@ -47,8 +48,18 @@ const EventDetailPage = () => {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <p className="text-xl text-gray-600">{error}</p>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 text-gray-900 antialiased">
+                <div className="bg-white/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-md w-full">
+                    <Alert severity="error" sx={{ width: "100%", mb: 2, fontSize: 18 }}>
+                        {error}
+                    </Alert>
+                    <button
+                        className="mt-2 px-6 py-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition"
+                        onClick={() => window.location.reload()}
+                    >
+                        Retry
+                    </button>
+                </div>
             </div>
         );
     }
@@ -107,7 +118,7 @@ const EventDetailPage = () => {
                     className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                
+
                 {/* Event Header Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
                     <div className="container mx-auto">
@@ -133,7 +144,7 @@ const EventDetailPage = () => {
                         {/* Event Details & About Section */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Event Details</h2>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12 mb-8">
                                 <div className="flex items-start space-x-4">
                                     <MapPin className="text-blue-600 h-6 w-6 flex-shrink-0 mt-1" />
@@ -150,7 +161,7 @@ const EventDetailPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="prose prose-gray max-w-none border-t border-gray-200 pt-8 mt-8">
                                 <h3 className="text-xl font-semibold text-gray-900 mb-4">About This Event</h3>
                                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-base">

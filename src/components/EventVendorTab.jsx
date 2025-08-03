@@ -14,6 +14,7 @@ import {
   Avatar,
   Typography,
   Box,
+  CardMedia,
 } from "@mui/material";
 import {
   Edit,
@@ -21,10 +22,12 @@ import {
   Visibility,
   Image as ImageIcon,
   Close,
+  Download,
+  OpenInNew,
 } from "@mui/icons-material";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
-import imageCompression from "browser-image-compression"; // Add this import
+import imageCompression from "browser-image-compression";
 import {
   getEventVendors,
   createEventVendor,
@@ -34,7 +37,7 @@ import {
 } from "../models/admin";
 
 function EventVendorTab() {
-  const [eventVendors, setEventVendors] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -46,27 +49,27 @@ function EventVendorTab() {
     desc: "",
     phone: "",
     insta: "",
-    banner: "",
-    banner_file: null, // Add for file upload
     location: "",
     user_id: "",
-    remove_banner: false, // Add for banner removal
+    banner: "",
+    banner_file: null,
+    remove_banner: false,
   });
 
   useEffect(() => {
-    fetchEventVendors();
+    fetchVendors();
     fetchUsers();
   }, []);
 
-  const fetchEventVendors = async () => {
+  const fetchVendors = async () => {
     setLoading(true);
     try {
       const response = await getEventVendors();
       console.log("Fetched vendors:", response.data);
-      setEventVendors(response.data || []);
+      setVendors(response.data || []);
     } catch (error) {
-      console.error("Error fetching event vendors:", error);
-      setEventVendors([]);
+      console.error("Error fetching vendors:", error);
+      setVendors([]);
     } finally {
       setLoading(false);
     }
@@ -81,8 +84,6 @@ function EventVendorTab() {
         setUsers(response);
       } else if (response && Array.isArray(response.data)) {
         setUsers(response.data);
-      } else if (response && response.users && Array.isArray(response.users)) {
-        setUsers(response.users);
       } else {
         console.warn("Unexpected user data format:", response);
         setUsers([]);
@@ -119,9 +120,7 @@ function EventVendorTab() {
   const handleBannerFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Check file size
       if (file.size > 10 * 1024 * 1024) {
-        // 10MB
         Swal.fire({
           icon: "error",
           title: "File Too Large",
@@ -132,7 +131,6 @@ function EventVendorTab() {
       }
 
       try {
-        // Show compression loading
         Swal.fire({
           title: "Processing Image...",
           text: "Compressing image for upload",
@@ -147,7 +145,7 @@ function EventVendorTab() {
         setFormData({
           ...formData,
           banner_file: compressedFile,
-          banner: "", // Clear URL if file is selected
+          banner: "",
           remove_banner: false,
         });
 
@@ -167,12 +165,12 @@ function EventVendorTab() {
     setFormData({
       name: "",
       desc: "",
-      phone: "",
+      phone: "", // Ensure it's a string
       insta: "",
-      banner: "",
-      banner_file: null,
       location: "",
       user_id: "",
+      banner: "",
+      banner_file: null,
       remove_banner: false,
     });
     setDialogOpen(true);
@@ -183,12 +181,12 @@ function EventVendorTab() {
     setFormData({
       name: vendor.name || "",
       desc: vendor.desc || "",
-      phone: vendor.phone || "",
+      phone: vendor.phone ? String(vendor.phone) : "", // Convert to string
       insta: vendor.insta || "",
-      banner: vendor.banner || "",
-      banner_file: null, // Reset file field
       location: vendor.location || "",
       user_id: vendor.user_id || "",
+      banner: vendor.banner || "",
+      banner_file: null,
       remove_banner: false,
     });
     setDialogOpen(true);
@@ -208,7 +206,7 @@ function EventVendorTab() {
     if (result.isConfirmed) {
       try {
         await deleteEventVendor(id);
-        setEventVendors((prev) => prev.filter((vendor) => vendor.id !== id));
+        setVendors((prev) => prev.filter((vendor) => vendor.id !== id));
         Swal.fire("Deleted!", "Vendor has been deleted.", "success");
       } catch (error) {
         console.error("Delete error:", error);
@@ -224,62 +222,142 @@ function EventVendorTab() {
         Swal.fire("Error!", "Vendor name is required.", "error");
         return;
       }
-
       if (!formData.user_id) {
         Swal.fire("Error!", "Please select a user for this vendor.", "error");
         return;
       }
 
-      // Check if we have files to upload
-      const hasFiles = formData.banner_file;
+      const hasBannerFile = formData.banner_file;
+      const hasBannerUrl = formData.banner && formData.banner.trim();
 
-      if (hasFiles) {
-        // Use FormData for file uploads
+      console.log("=== FRONTEND SUBMIT DEBUG ===");
+      console.log("Form data:", formData);
+      console.log("Has banner file:", hasBannerFile);
+      console.log("Has banner URL:", hasBannerUrl);
+      console.log("Is editing:", !!editingVendor);
+      console.log("Remove banner:", formData.remove_banner);
+
+      // Banner validation logic
+      if (!editingVendor && !hasBannerFile && !hasBannerUrl) {
+        Swal.fire(
+          "Error!",
+          "Banner is required. Please provide either a banner URL or upload a banner image.",
+          "error"
+        );
+        return;
+      }
+
+      if (
+        editingVendor &&
+        !hasBannerFile &&
+        !hasBannerUrl &&
+        (!editingVendor.banner || formData.remove_banner)
+      ) {
+        Swal.fire(
+          "Error!",
+          "Banner is required. Please provide either a banner URL or upload a banner image.",
+          "error"
+        );
+        return;
+      }
+
+      if (editingVendor) {
+        // For updates, always use FormData to ensure compatibility with multer
         const formDataToSend = new FormData();
 
-        // Add text fields
-        const fieldsToAdd = {
-          name: formData.name,
-          desc: formData.desc,
-          phone: formData.phone,
-          insta: formData.insta,
-          location: formData.location,
-          user_id: formData.user_id,
-          remove_banner: formData.remove_banner || false,
+        // Helper function to safely convert to string and trim
+        const safeStringTrim = (value) => {
+          if (value === null || value === undefined) return "";
+          return String(value).trim();
         };
 
-        Object.keys(fieldsToAdd).forEach((key) => {
-          if (fieldsToAdd[key] !== null && fieldsToAdd[key] !== undefined) {
-            formDataToSend.append(key, fieldsToAdd[key]);
+        // Add all text fields with safe string conversion
+        const fieldsToAdd = {
+          name: safeStringTrim(formData.name),
+          desc: safeStringTrim(formData.desc),
+          phone: safeStringTrim(formData.phone),
+          insta: safeStringTrim(formData.insta),
+          location: safeStringTrim(formData.location),
+          user_id: formData.user_id,
+          remove_banner: formData.remove_banner ? "true" : "false",
+        };
+
+        // Add banner URL only if provided and no file upload
+        if (!hasBannerFile && hasBannerUrl) {
+          fieldsToAdd.banner = safeStringTrim(formData.banner);
+        }
+
+        // Append all fields to FormData (only non-empty values)
+        Object.entries(fieldsToAdd).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== "") {
+            formDataToSend.append(key, value);
           }
         });
 
-        // Add banner file
-        if (formData.banner_file) {
+        // Add the file if present
+        if (hasBannerFile) {
           formDataToSend.append("banner_image", formData.banner_file);
+          console.log("Added file to FormData:", {
+            name: formData.banner_file.name,
+            size: formData.banner_file.size,
+            type: formData.banner_file.type,
+          });
         }
 
-        if (editingVendor) {
-          await updateEventVendor(editingVendor.id, formDataToSend);
-        } else {
-          await createEventVendor(formDataToSend);
+        console.log("=== SENDING UPDATE ===");
+        console.log("Vendor ID:", editingVendor.id);
+        console.log("FormData entries:");
+        for (let [key, value] of formDataToSend.entries()) {
+          if (value instanceof File) {
+            console.log(`${key}: File(${value.name})`);
+          } else {
+            console.log(`${key}: ${value}`);
+          }
         }
+
+        await updateEventVendor(editingVendor.id, formDataToSend);
       } else {
-        // Use regular JSON for text-only updates
-        const processedData = {
-          name: formData.name,
-          desc: formData.desc,
-          phone: formData.phone ? parseInt(formData.phone) : null,
-          insta: formData.insta,
-          banner: formData.banner,
-          location: formData.location,
-          user_id: formData.user_id,
-          remove_banner: formData.remove_banner,
-        };
+        // For creating new vendors
+        if (hasBannerFile) {
+          // Use FormData for file uploads
+          const formDataToSend = new FormData();
 
-        if (editingVendor) {
-          await updateEventVendor(editingVendor.id, processedData);
+          // Helper function for safe string conversion
+          const safeStringTrim = (value) => {
+            if (value === null || value === undefined) return "";
+            return String(value).trim();
+          };
+
+          const fieldsToAdd = {
+            name: safeStringTrim(formData.name),
+            desc: safeStringTrim(formData.desc),
+            phone: safeStringTrim(formData.phone),
+            insta: safeStringTrim(formData.insta),
+            location: safeStringTrim(formData.location),
+            user_id: formData.user_id,
+          };
+
+          Object.entries(fieldsToAdd).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== "") {
+              formDataToSend.append(key, value);
+            }
+          });
+
+          formDataToSend.append("banner_image", formData.banner_file);
+          await createEventVendor(formDataToSend);
         } else {
+          // Use JSON for URL-only creates
+          const processedData = {
+            name: formData.name.trim(),
+            desc: formData.desc ? formData.desc.trim() : "",
+            phone: formData.phone
+              ? parseInt(String(formData.phone).trim())
+              : null,
+            insta: formData.insta ? formData.insta.trim() : "",
+            location: formData.location ? formData.location.trim() : "",
+            user_id: formData.user_id,
+            banner: formData.banner ? formData.banner.trim() : "",
+          };
           await createEventVendor(processedData);
         }
       }
@@ -289,9 +367,8 @@ function EventVendorTab() {
         `Vendor ${editingVendor ? "updated" : "added"} successfully.`,
         "success"
       );
-
       setDialogOpen(false);
-      fetchEventVendors(); // Refresh to get updated data
+      fetchVendors();
     } catch (error) {
       console.error("Submit error:", error);
       Swal.fire("Error!", error.message || "Failed to save vendor.", "error");
@@ -299,8 +376,8 @@ function EventVendorTab() {
   };
 
   // Handle banner preview
-  const handleViewBanner = (bannerUrl, vendorName) => {
-    if (!bannerUrl) {
+  const handleViewImage = (imageUrl, title) => {
+    if (!imageUrl) {
       Swal.fire({
         icon: "info",
         title: "No Banner",
@@ -308,8 +385,28 @@ function EventVendorTab() {
       });
       return;
     }
-    setSelectedImage({ url: bannerUrl, title: vendorName });
+    setSelectedImage({ url: imageUrl, title });
     setImageDialogOpen(true);
+  };
+
+  // Handle image download
+  const handleDownloadImage = () => {
+    if (selectedImage.url) {
+      const link = document.createElement("a");
+      link.href = selectedImage.url;
+      link.download = `${selectedImage.title}_banner.jpg`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // Handle open image in new tab
+  const handleOpenImageNewTab = () => {
+    if (selectedImage.url) {
+      window.open(selectedImage.url, "_blank");
+    }
   };
 
   // Get user name by ID
@@ -337,24 +434,27 @@ function EventVendorTab() {
       ),
     },
     {
-      field: "banner",
-      headerName: "Banner",
-      width: 120,
+      field: "user",
+      headerName: "User Info",
+      width: 250,
       renderCell: (params) => (
-        <div className="flex items-center space-x-1">
-          {params.value ? (
-            <Chip
-              label="View"
-              size="small"
-              color="primary"
-              icon={<ImageIcon />}
-              onClick={() => handleViewBanner(params.value, params.row.name)}
-              style={{ cursor: "pointer" }}
-            />
-          ) : (
-            <Chip label="No Banner" size="small" color="default" />
-          )}
-        </div>
+        <Box display="flex" alignItems="center">
+          <Avatar
+            sx={{ width: 32, height: 32, fontSize: "0.875rem" }}
+            style={{ marginRight: 8 }}>
+            {params.row.user?.first_name?.charAt(0) || "U"}
+          </Avatar>
+          <Box>
+            <Typography variant="body2" fontWeight="medium">
+              {params.row.user
+                ? `${params.row.user.first_name} ${params.row.user.last_name}`
+                : getUserName(params.row.user_id)}
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              {params.row.user?.email || getUserEmail(params.row.user_id)}
+            </Typography>
+          </Box>
+        </Box>
       ),
     },
     {
@@ -385,27 +485,24 @@ function EventVendorTab() {
     },
     { field: "location", headerName: "Location", width: 150 },
     {
-      field: "user",
-      headerName: "User Info",
-      width: 250,
+      field: "banner",
+      headerName: "Banner",
+      width: 120,
       renderCell: (params) => (
-        <Box display="flex" alignItems="center" space={1}>
-          <Avatar
-            sx={{ width: 32, height: 32, fontSize: "0.875rem" }}
-            style={{ marginRight: 8 }}>
-            {params.row.user?.first_name?.charAt(0) || "U"}
-          </Avatar>
-          <Box>
-            <Typography variant="body2" fontWeight="medium">
-              {params.row.user
-                ? `${params.row.user.first_name} ${params.row.user.last_name}`
-                : getUserName(params.row.user_id)}
-            </Typography>
-            <Typography variant="caption" color="textSecondary">
-              {params.row.user?.email || getUserEmail(params.row.user_id)}
-            </Typography>
-          </Box>
-        </Box>
+        <div className="flex items-center space-x-1">
+          {params.value ? (
+            <Chip
+              label="View"
+              size="small"
+              color="primary"
+              icon={<ImageIcon />}
+              onClick={() => handleViewImage(params.value, params.row.name)}
+              style={{ cursor: "pointer" }}
+            />
+          ) : (
+            <Chip label="No Banner" size="small" color="default" />
+          )}
+        </div>
       ),
     },
     {
@@ -451,7 +548,7 @@ function EventVendorTab() {
 
       <div style={{ height: 600, width: "100%" }}>
         <DataGrid
-          rows={eventVendors}
+          rows={vendors}
           columns={columns}
           loading={loading}
           checkboxSelection
@@ -567,7 +664,7 @@ function EventVendorTab() {
                         size="small"
                         startIcon={<Visibility />}
                         onClick={() =>
-                          handleViewBanner(formData.banner, formData.name)
+                          handleViewImage(formData.banner, formData.name)
                         }>
                         View
                       </Button>
@@ -585,19 +682,29 @@ function EventVendorTab() {
                 </Box>
               )}
 
-              {/* Banner URL Input (for new vendors or when no banner exists) */}
+              {/* Banner URL Input */}
               {(!editingVendor ||
                 !formData.banner ||
                 formData.remove_banner) && (
                 <TextField
                   label="Banner URL"
                   fullWidth
+                  required={!editingVendor && !formData.banner_file}
                   value={formData.banner}
                   onChange={(e) =>
                     setFormData({ ...formData, banner: e.target.value })
                   }
                   margin="normal"
-                  helperText="Enter image URL or upload a file below"
+                  helperText={
+                    !editingVendor
+                      ? "Required: Enter image URL or upload a file below"
+                      : "Enter image URL or upload a file below"
+                  }
+                  error={
+                    !editingVendor &&
+                    !formData.banner_file &&
+                    !formData.banner.trim()
+                  }
                 />
               )}
 
@@ -647,9 +754,27 @@ function EventVendorTab() {
             <Typography variant="h6">
               Banner Preview - {selectedImage.title}
             </Typography>
-            <IconButton onClick={() => setImageDialogOpen(false)}>
-              <Close />
-            </IconButton>
+            <div className="flex space-x-1">
+              <IconButton
+                onClick={handleDownloadImage}
+                color="primary"
+                title="Download Image"
+                size="small">
+                <Download />
+              </IconButton>
+              <IconButton
+                onClick={handleOpenImageNewTab}
+                color="primary"
+                title="Open in New Tab"
+                size="small">
+                <OpenInNew />
+              </IconButton>
+              <IconButton
+                onClick={() => setImageDialogOpen(false)}
+                size="small">
+                <Close />
+              </IconButton>
+            </div>
           </div>
         </DialogTitle>
         <DialogContent>
@@ -658,14 +783,16 @@ function EventVendorTab() {
             justifyContent="center"
             alignItems="center"
             style={{ minHeight: "300px" }}>
-            <img
-              src={selectedImage.url}
+            <CardMedia
+              component="img"
+              image={selectedImage.url}
               alt="Vendor banner"
               style={{
                 maxWidth: "100%",
                 maxHeight: "500px",
                 objectFit: "contain",
                 borderRadius: "8px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
               }}
               onError={(e) => {
                 e.target.style.display = "none";
@@ -676,10 +803,15 @@ function EventVendorTab() {
               display="none"
               flexDirection="column"
               alignItems="center"
+              justifyContent="center"
               style={{ minHeight: "300px" }}>
               <ImageIcon style={{ fontSize: 64, color: "#ccc" }} />
               <Typography variant="body1" color="textSecondary" mt={2}>
                 Failed to load banner image
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                The image URL might be invalid or the image might not be
+                accessible.
               </Typography>
             </Box>
           </Box>

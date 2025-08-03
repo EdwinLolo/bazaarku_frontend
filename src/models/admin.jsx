@@ -178,6 +178,26 @@ export const updateEventVendor = async (vendorId, vendorData) => {
   // Check if vendorData is FormData (for file uploads) or regular object
   const isFormData = vendorData instanceof FormData;
 
+  console.log("=== UPDATE EVENT VENDOR API ===");
+  console.log("Vendor ID:", vendorId);
+  console.log("Is FormData:", isFormData);
+
+  if (isFormData) {
+    console.log("FormData contents:");
+    for (let [key, value] of vendorData.entries()) {
+      if (value instanceof File) {
+        console.log(
+          `${key}:`,
+          `File(${value.name}, ${value.size} bytes, ${value.type})`
+        );
+      } else {
+        console.log(`${key}:`, value);
+      }
+    }
+  } else {
+    console.log("Regular data:", vendorData);
+  }
+
   const options = {
     method: "PUT",
     headers: {
@@ -188,14 +208,23 @@ export const updateEventVendor = async (vendorId, vendorData) => {
     body: isFormData ? vendorData : JSON.stringify(vendorData),
   };
 
+  console.log("Request headers:", options.headers);
+  console.log("Making request to:", `${baseURL}/vendors/${vendorId}`);
+
   const response = await fetch(`${baseURL}/vendors/${vendorId}`, options);
+
+  console.log("Response status:", response.status);
+  console.log("Response headers:", response.headers);
 
   if (!response.ok) {
     const error = await response.json();
+    console.error("API Error:", error);
     throw new Error(error.error || "Failed to update vendor");
   }
 
-  return await response.json();
+  const result = await response.json();
+  console.log("API Response:", result);
+  return result;
 };
 
 export const deleteEventVendor = async (vendorId) => {

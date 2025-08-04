@@ -434,7 +434,6 @@ export const getRentalProducts = async () => {
   });
 };
 
-// In your models/admin.js, update the endpoints
 export const createRentalProduct = async (data) => {
   const token = localStorage.getItem("session_token");
   const baseURL = getBaseUrl();
@@ -489,6 +488,70 @@ export const updateRentalProduct = async (id, data) => {
 
 export const deleteRentalProduct = async (productId) => {
   return apiCall(`/rental-products/${productId}`, {
+    method: "DELETE",
+  });
+};
+
+export const getBanners = async () => {
+  return apiCall("/banners", {
+    method: "GET",
+  });
+};
+
+export const createBanner = async (data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  const isFormData = data instanceof FormData;
+
+  const options = {
+    method: "POST",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  };
+
+  // Changed endpoint from /rentals to /rental-products
+  const response = await fetch(`${baseURL}/banners`, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to create rental product");
+  }
+
+  return await response.json();
+};
+
+export const updateBanner = async (id, data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  const isFormData = data instanceof FormData;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  };
+
+  // Changed endpoint
+  const response = await fetch(`${baseURL}/banners/${id}`, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update rental product");
+  }
+
+  return await response.json();
+};
+
+export const deleteBanner = async (id) => {
+  return apiCall(`/banners/${id}`, {
     method: "DELETE",
   });
 };

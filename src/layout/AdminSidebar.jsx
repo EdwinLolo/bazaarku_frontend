@@ -182,10 +182,10 @@ function AdminSidebar() {
         <div className="p-4 border-t border-gray-700">
           {!isCollapsed && (
             <button
-              onClick={() => navigate("/admin/settings")}
+              onClick={() => navigate("/")}
               className="flex items-center w-full px-3 py-2 mb-3 text-sm font-medium text-gray-300 transition-colors rounded-lg hover:bg-gray-700 hover:text-white">
               <Settings size={20} />
-              <span className="ml-3">Settings</span>
+              <span className="ml-3">User Home</span>
             </button>
           )}
 

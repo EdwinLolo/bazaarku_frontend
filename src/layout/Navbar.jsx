@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, Menu, X, UserRound, ChevronDown } from "lucide-react";
+import { Search, Menu, X, ChevronDown } from "lucide-react";
 import LoginPopup from "../components/popup/LoginPopup";
 import CreateAccountPopup from "../components/popup/CreateAccountPopup";
 import Logo from "../assets/logo.png";
 import { logout as logoutAPI } from "../models/auth";
 import { useAuth } from "../App";
+import { getBaseUrl } from "../models/utils";
 
 // Main Navbar Component
 const Navbar = () => {
@@ -59,13 +60,14 @@ const Navbar = () => {
         const fetchVendorId = async () => {
             if (isAuthenticated && user?.role === "vendor") {
                 try {
+                    console.log("Fetching vendor ID for user:", user);
                     const response = await fetch(`${getBaseUrl()}/vendors/user/${user.id}`);
                     if (!response.ok) {
                         throw new Error('Failed to fetch vendor data');
                     }
                     const data = await response.json();
-                    if (data && data.id) {
-                        setVendorId(data.id);
+                    if (data && data.data.id) {
+                        setVendorId(data.data.id);
                     }
                 } catch (error) {
                     console.error("Error fetching vendor data:", error);

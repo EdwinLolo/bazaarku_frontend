@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom';
 import { getBaseUrl } from "../models/utils";
 import Loading from "../components/Loading";
 import EventCard from "../components/EventCard";
-import { MapPin, Calendar, Globe, Mail, Phone } from 'lucide-react';
+import { MapPin, Calendar, Globe, Mail, Edit } from 'lucide-react';
 import { FaInstagram, FaWhatsapp, FaFacebook, FaTwitter } from "react-icons/fa";
 import ErrorDisplay from "../components/ErrorDisplay";
+import { useAuth } from "../App";
 
 function VendorPage() {
     const { id } = useParams();
@@ -14,6 +15,11 @@ function VendorPage() {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('events');
 
+    const { user } = useAuth();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({});
+
     useEffect(() => {
         const fetchVendor = async () => {
             try {
@@ -21,10 +27,25 @@ function VendorPage() {
                 const data = await response.json();
 
                 if (data.success && data.data) {
-                    setVendor({
+                    let isVendor = false;
+                    if (user === null) {
+                        const userData = localStorage.getItem("user_profile");
+                        if (userData) {
+                            const parsedUserData = JSON.parse(userData);
+                            isVendor = data.data.user_id === parsedUserData.id && parsedUserData.role === 'vendor';
+                        }
+                    } else {
+                        isVendor = data.data.user_id === user?.id && user?.role === 'vendor';
+                    }
+
+                    const vendorData = {
                         ...data.data,
+                        isVendor: isVendor,
                         event: data.data.event || []
-                    });
+                    };
+
+                    setVendor(vendorData);
+                    setFormData(vendorData);
                 } else {
                     setError(data.message || 'Vendor not found.');
                 }
@@ -37,6 +58,40 @@ function VendorPage() {
         };
         fetchVendor();
     }, [id]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`${getBaseUrl()}/vendors/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                setVendor(prev => ({ ...prev, ...formData }));
+                setIsEditing(false);
+            } else {
+                setError(data.message || 'Failed to update vendor details.');
+            }
+        } catch (err) {
+            console.error("Error updating vendor details:", err);
+            setError('An error occurred while updating vendor details.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     if (error) {
         return (
@@ -71,7 +126,16 @@ function VendorPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-purple-900/30"></div>
 
                 <div className="relative container mx-auto px-4 h-full flex flex-col justify-end pb-10">
-                    <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg max-w-3xl">
+                    <div className="relative bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg max-w-3xl">
+                        {vendor.isVendor && (
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="absolute top-4 right-4 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors z-20"
+                                aria-label="Edit Profile"
+                            >
+                                <Edit className="w-5 h-5 cursor-pointer" />
+                            </button>
+                        )}
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             <div className="bg-gray-100 rounded-xl w-24 h-24 md:w-32 md:h-32 border-3 border-black flex items-center justify-center">
                                 <span className="text-5xl font-bold text-gray-700">
@@ -380,6 +444,55 @@ function VendorPage() {
                     </div>
                 </div>
             </div>
+
+            {isEditing && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <form onSubmit={handleFormSubmit} className="p-8">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900">Edit Your Profile</h2>
+                                <button type="button" onClick={() => setIsEditing(false)} className="text-gray-500 hover:text-gray-800">&times;</button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Vendor Name</label>
+                                    <input type="text" name="name" id="name" value={formData.name || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                </div>
+                                <div>
+                                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                    <input type="text" name="location" id="location" value={formData.location || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                </div>
+                                <div>
+                                    <label htmlFor="desc" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <textarea name="desc" id="desc" rows="4" value={formData.desc || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                </div>
+                                <div>
+                                    <label htmlFor="banner" className="block text-sm font-medium text-gray-700 mb-1">Banner Image URL</label>
+                                    <input type="text" name="banner" id="banner" value={formData.banner || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                </div>
+                                <div>
+                                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Whatsapp Number</label>
+                                    <input type="tel" name="phone" id="phone" value={formData.phone || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                </div>
+                                <div>
+                                    <label htmlFor="insta" className="block text-sm font-medium text-gray-700 mb-1">Instagram Handle (without @)</label>
+                                    <input type="text" name="insta" id="insta" value={formData.insta || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                </div>
+                                <div>
+                                    <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+                                    <input type="url" name="website" id="website" value={formData.website || ''} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-4 mt-8">
+                                <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-2 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">Cancel</button>
+                                <button type="submit" className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

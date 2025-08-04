@@ -2,10 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Calendar, Users, Store, Phone, CircleAlert, RefreshCw } from "lucide-react";
 import { FaWhatsapp } from 'react-icons/fa';
+import Swal from "sweetalert2";
+
 import { getBaseUrl } from "../models/utils";
+import { useAuth } from "../App";
+
 import Loading from "../components/Loading";
 import ApplyBoothPopup from "../components/popup/ApplyBoothPopup";
 import ErrorDisplay from "../components/ErrorDisplay";
+import LoginPopup from "../components/popup/LoginPopup";
+import CreateAccountPopup from "../components/popup/CreateAccountPopup";
 
 const EventDetailPage = () => {
     const { id } = useParams();
@@ -14,6 +20,13 @@ const EventDetailPage = () => {
     const [error, setError] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [showLogin, setShowLogin] = useState(false);
+    const [showCreate, setShowCreate] = useState(false);
+
+    const { user } = useAuth();
+    const user_profile = localStorage.getItem("user_profile");
+
+    const isLoggedIn = user !== null && user !== undefined || user_profile !== null && user_profile !== undefined;
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -93,6 +106,25 @@ const EventDetailPage = () => {
     const totalBooths = event.total_booths;
     const bookedBooths = event.accepted_booths;
     const availableBooths = totalBooths - bookedBooths;
+
+    if (showPopup && !isLoggedIn) {
+        return (
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Required',
+                text: 'You must be logged in to apply for a booth.',
+                confirmButtonText: 'Login',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setShowLogin(true);
+                } else {
+                    setShowPopup(false);
+                }
+            })
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -271,10 +303,33 @@ const EventDetailPage = () => {
                 </div>
             </div>
 
-            {showPopup && (
+            {/* Apply Booth Popup */}
+            {showPopup && isLoggedIn && (
                 <ApplyBoothPopup
                     event={selectedEvent}
                     onClose={() => setShowPopup(false)}
+                />
+            )}
+
+            {/* Login Popup */}
+            {showLogin && (
+                <LoginPopup
+                    onClose={() => setShowLogin(false)}
+                    onRegisterClick={() => {
+                        setShowLogin(false);
+                        setShowCreate(true);
+                    }}
+                />
+            )}
+
+            {/* Create Account Popup */}
+            {showCreate && (
+                <CreateAccountPopup
+                    onClose={() => setShowCreate(false)}
+                    onLoginClick={() => {
+                        setShowCreate(false);
+                        setShowLogin(true);
+                    }}
                 />
             )}
         </div>

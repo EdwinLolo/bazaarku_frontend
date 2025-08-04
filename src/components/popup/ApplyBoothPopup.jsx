@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Loader2, User, Phone, MessageSquare } from 'lucide-react';
 import { getBaseUrl } from "../../models/utils";
+import Swal from "sweetalert2";
 
 function ApplyBoothPopup({ event, onClose }) {
     const [errors, setErrors] = useState({});
@@ -61,24 +62,32 @@ function ApplyBoothPopup({ event, onClose }) {
 
         console.log("Submitting application with data:", { ...formData, eventId: event.id });
         try {
+            const token = localStorage.getItem("access_token");
             const response = await fetch(`${getBaseUrl()}/booths`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ ...formData, eventId: event.id }),
+                body: JSON.stringify({ ...formData, event_id: event.id }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Error submitting application:", errorData);
-                setErrors({ general: "Failed to submit application. Please try again." });
-            }
-
             const responseData = await response.json();
-            console.log("Application submitted successfully:", responseData);
 
-            onClose(); // Close the popup after successful submission
+            if (!response.ok) {
+                console.error("Error submitting application:", responseData);
+                setErrors({ general: responseData.message || "Failed to submit application. Please try again." });
+            } else {
+                console.log("Application submitted successfully:", responseData);
+                onClose(); // Close the popup ONLY on successful submission.
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Application Submitted',
+                    text: 'Your booth application has been submitted successfully. We will review it and get back to you soon.',
+                    confirmButtonText: 'OK',
+                });
+            }
         } catch (error) {
             console.error("Error submitting application:", error);
             setErrors({ general: "An error occurred while submitting your application. Please try again." });

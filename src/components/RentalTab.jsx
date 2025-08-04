@@ -12,103 +12,129 @@ import {
   MenuItem,
   Chip,
   Box,
+  Typography,
+  CardMedia,
 } from "@mui/material";
-import { Edit, Delete, Visibility } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Visibility,
+  Image as ImageIcon,
+  Close,
+  Download,
+  OpenInNew,
+} from "@mui/icons-material";
 import { Plus } from "lucide-react";
 import Swal from "sweetalert2";
+import {
+  getRentalProducts,
+  createRentalProduct,
+  updateRentalProduct,
+  deleteRentalProduct,
+  getRentalCategories,
+} from "../models/admin";
 
 function RentalTab() {
+  const [categories, setCategories] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState({ url: "", title: "" });
   const [editingRental, setEditingRental] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category_id: "",
-    price_per_day: "",
-    quantity_available: "",
-    quantity_total: "",
-    condition: "excellent",
-    status: "available",
-    specifications: "",
-    image_url: "",
+    price: "",
+    rental_id: "",
+    location: "",
+    contact: "",
+    is_ready: "true",
+    banner: "",
+    banner_file: null, // For storing the actual file
+    remove_banner: false,
   });
 
-  // Mock categories - replace with actual API calls
-  const [categories] = useState([
-    { id: 1, name: "Audio Equipment" },
-    { id: 2, name: "Furniture" },
-    { id: 3, name: "Lighting" },
-    { id: 4, name: "Catering Equipment" },
-  ]);
-
   useEffect(() => {
+    fetchCategories();
     fetchRentals();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await getRentalCategories();
+      console.log("Fetched Categories:", response.data);
+      const categoriesWithIds = (response.data || []).map(
+        (category, index) => ({
+          ...category,
+          id: category.id || `temp-${index}-${Date.now()}`,
+        })
+      );
+      setCategories(categoriesWithIds);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    }
+  };
 
   const fetchRentals = async () => {
     setLoading(true);
     try {
-      const mockData = [
-        {
-          id: 1,
-          name: "Wireless Microphone Set",
-          description: "Professional wireless microphone system",
-          category_id: 1,
-          price_per_day: 25.0,
-          quantity_available: 8,
-          quantity_total: 10,
-          condition: "excellent",
-          status: "available",
-          specifications: "Frequency: 2.4GHz, Range: 100m, Battery: 8 hours",
-          image_url: "https://example.com/mic.jpg",
-        },
-        {
-          id: 2,
-          name: "Round Table (8-seater)",
-          description: "Elegant round dining table",
-          category_id: 2,
-          price_per_day: 15.0,
-          quantity_available: 0,
-          quantity_total: 20,
-          condition: "good",
-          status: "rented",
-          specifications: "Diameter: 150cm, Height: 75cm, Material: Wood",
-          image_url: "https://example.com/table.jpg",
-        },
-        {
-          id: 3,
-          name: "LED Spotlight",
-          description: "High-power LED spotlight for events",
-          category_id: 3,
-          price_per_day: 35.0,
-          quantity_available: 5,
-          quantity_total: 6,
-          condition: "excellent",
-          status: "available",
-          specifications: "Power: 200W, Color: RGB, DMX Compatible",
-          image_url: "https://example.com/light.jpg",
-        },
-        {
-          id: 4,
-          name: "Food Warmer",
-          description: "Electric food warming tray",
-          category_id: 4,
-          price_per_day: 12.0,
-          quantity_available: 3,
-          quantity_total: 5,
-          condition: "fair",
-          status: "maintenance",
-          specifications: "Capacity: 5L, Temperature: 60-80°C, Power: 300W",
-          image_url: "https://example.com/warmer.jpg",
-        },
-      ];
-      setRentals(mockData);
+      const response = await getRentalProducts();
+      console.log("Fetched Rentals:", response.data);
+      const rentalsWithIds = (response.data || []).map((rental, index) => ({
+        ...rental,
+        id: rental.id || `temp-${index}-${Date.now()}`,
+      }));
+      setRentals(rentalsWithIds);
     } catch (error) {
       console.error("Error fetching rentals:", error);
+      setRentals([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle image file upload
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0];
+    console.log("File selected:", file);
+
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire({
+          icon: "error",
+          title: "File Too Large",
+          text: "Please select an image smaller than 5MB.",
+        });
+        e.target.value = "";
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        Swal.fire({
+          icon: "error",
+          title: "Invalid File Type",
+          text: "Please select a valid image file (JPG, PNG, GIF, etc.).",
+        });
+        e.target.value = "";
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        banner_file: file,
+        banner: "", // Clear banner URL when file is selected
+        remove_banner: false, // Don't automatically set remove_banner
+      }));
+
+      console.log("File set to form data:", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
     }
   };
 
@@ -117,21 +143,33 @@ function RentalTab() {
     setFormData({
       name: "",
       description: "",
-      category_id: "",
-      price_per_day: "",
-      quantity_available: "",
-      quantity_total: "",
-      condition: "excellent",
-      status: "available",
-      specifications: "",
-      image_url: "",
+      price: "",
+      rental_id: "",
+      location: "",
+      contact: "",
+      is_ready: "true",
+      banner: "",
+      banner_file: null, // For storing the actual file
+      remove_banner: false,
     });
     setDialogOpen(true);
   };
 
   const handleEdit = (rental) => {
     setEditingRental(rental);
-    setFormData(rental);
+    setFormData({
+      name: rental.name || "",
+      description: rental.description || "",
+      price: rental.price || "",
+      rental_id: rental.rental_id || "",
+      location: rental.location || "",
+      contact: rental.contact || "",
+      is_ready:
+        rental.is_ready !== undefined ? String(rental.is_ready) : "true",
+      banner: rental.banner || "",
+      banner_file: null,
+      remove_banner: false,
+    });
     setDialogOpen(true);
   };
 
@@ -148,9 +186,11 @@ function RentalTab() {
 
     if (result.isConfirmed) {
       try {
+        await deleteRentalProduct(id);
         setRentals((prev) => prev.filter((rental) => rental.id !== id));
         Swal.fire("Deleted!", "Rental item has been deleted.", "success");
       } catch (error) {
+        console.error("Delete error:", error);
         Swal.fire("Error!", "Failed to delete rental item.", "error");
       }
     }
@@ -158,123 +198,323 @@ function RentalTab() {
 
   const handleSubmit = async () => {
     try {
-      const processedData = {
-        ...formData,
-        category_id: parseInt(formData.category_id),
-        price_per_day: parseFloat(formData.price_per_day),
-        quantity_available: parseInt(formData.quantity_available),
-        quantity_total: parseInt(formData.quantity_total),
+      // Validation
+      if (!formData.name.trim()) {
+        Swal.fire("Error!", "Item name is required.", "error");
+        return;
+      }
+      if (!formData.rental_id) {
+        Swal.fire("Error!", "Please select a category.", "error");
+        return;
+      }
+      if (!formData.price || parseFloat(formData.price) <= 0) {
+        Swal.fire("Error!", "Please enter a valid price.", "error");
+        return;
+      }
+
+      const hasBannerFile = formData.banner_file;
+      const hasBannerUrl = formData.banner && formData.banner.trim();
+
+      console.log("=== FRONTEND SUBMIT DEBUG ===");
+      console.log("Form data:", formData);
+      console.log("Has banner file:", hasBannerFile);
+      console.log("Has banner URL:", hasBannerUrl);
+      console.log("Is editing:", !!editingRental);
+      console.log("Remove banner:", formData.remove_banner);
+
+      const safeStringTrim = (value) => {
+        if (value === null || value === undefined) return "";
+        return String(value).trim();
       };
 
       if (editingRental) {
+        // Always use FormData to be consistent with backend multer middleware
+        const formDataToSend = new FormData();
+
+        const fieldsToAdd = {
+          name: safeStringTrim(formData.name),
+          description: safeStringTrim(formData.description),
+          price: formData.price,
+          rental_id: formData.rental_id,
+          location: safeStringTrim(formData.location),
+          contact: safeStringTrim(formData.contact),
+          is_ready: formData.is_ready,
+        };
+
+        // Fixed banner logic
+        if (hasBannerFile) {
+          // If uploading a new file, don't send remove_banner
+          // The backend will handle replacing the old banner
+          console.log("Uploading new file - not setting remove_banner");
+        } else if (formData.remove_banner && !hasBannerFile) {
+          // Only set remove_banner if explicitly removing and no new file
+          fieldsToAdd.remove_banner = "true";
+          console.log("Setting remove_banner to true");
+        } else if (!hasBannerFile && hasBannerUrl && !formData.remove_banner) {
+          // Updating with URL only
+          fieldsToAdd.banner = safeStringTrim(formData.banner);
+          console.log("Setting banner URL:", fieldsToAdd.banner);
+        }
+
+        // Append all fields to FormData
+        Object.entries(fieldsToAdd).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== "") {
+            formDataToSend.append(key, value);
+            console.log(`Added to FormData: ${key} = ${value}`);
+          }
+        });
+
+        // Add the file if present
+        if (hasBannerFile) {
+          formDataToSend.append("product_image", formData.banner_file);
+          console.log("Added file to FormData:", {
+            name: formData.banner_file,
+          });
+        }
+
+        console.log("=== SENDING UPDATE ===");
+        console.log("Category ID:", editingRental.id);
+        console.log("FormData entries:");
+        for (let [key, value] of formDataToSend.entries()) {
+          if (value instanceof File) {
+            console.log(`${key}: File(${value.name})`);
+          } else {
+            console.log(`${key}: ${value}`);
+          }
+        }
+
+        const response = await updateRentalProduct(
+          editingRental.id,
+          formDataToSend
+        );
+
+        // Update local state
         setRentals((prev) =>
-          prev.map((rental) =>
-            rental.id === editingRental.id
-              ? { ...rental, ...processedData }
-              : rental
+          prev.map((cat) =>
+            cat.id === editingRental.id
+              ? { ...cat, ...(response.data || response) }
+              : cat
           )
         );
+
         Swal.fire("Updated!", "Rental item updated successfully.", "success");
       } else {
-        const newRental = { ...processedData, id: Date.now() };
-        setRentals((prev) => [...prev, newRental]);
+        // Create new category
+        if (hasBannerFile) {
+          // Use FormData for file uploads
+          const formDataToSend = new FormData();
+
+          const fieldsToAdd = {
+            name: safeStringTrim(formData.name),
+            description: safeStringTrim(formData.description),
+            price: formData.price,
+            rental_id: formData.rental_id,
+            location: safeStringTrim(formData.location),
+            contact: safeStringTrim(formData.contact),
+            is_ready: formData.is_ready,
+          };
+
+          Object.entries(fieldsToAdd).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== "") {
+              formDataToSend.append(key, value);
+            }
+          });
+
+          formDataToSend.append("product_image", formData.banner_file);
+
+          console.log("Creating category with file upload");
+          const response = await createRentalProduct(formDataToSend);
+
+          let newProduct;
+          if (response.data && response.data.id) {
+            newProduct = response.data;
+          } else if (response.id) {
+            newProduct = {
+              ...fieldsToAdd,
+              id: response.id,
+              banner: response.banner || response.data?.banner,
+            };
+          } else {
+            newProduct = { ...fieldsToAdd, id: Date.now() };
+          }
+
+          setRentals((prev) => [...prev, newProduct]);
+        } else {
+          // Use JSON for URL-only creates
+          const processedData = {
+            name: safeStringTrim(formData.name),
+            description: safeStringTrim(formData.description),
+            price: formData.price,
+            rental_id: formData.rental_id,
+            location: safeStringTrim(formData.location),
+            contact: safeStringTrim(formData.contact),
+            is_ready: formData.is_ready,
+          };
+
+          // Only add banner if it's provided and not empty
+          if (hasBannerUrl) {
+            processedData.banner = formData.banner.trim();
+          }
+
+          console.log("Creating category with JSON data:", processedData);
+          const response = await createRentalProduct(processedData);
+
+          let newCategory;
+          if (response.data && response.data.id) {
+            newCategory = response.data;
+          } else if (response.id) {
+            newCategory = { ...processedData, id: response.id };
+          } else {
+            newCategory = { ...processedData, id: Date.now() };
+          }
+
+          setRentals((prev) => [...prev, newCategory]);
+        }
+
         Swal.fire("Added!", "Rental item added successfully.", "success");
       }
+
       setDialogOpen(false);
+
+      // Refresh data to get latest from server
+      fetchRentals();
     } catch (error) {
-      Swal.fire("Error!", "Failed to save rental item.", "error");
+      console.error("Submit error:", error);
+
+      // More detailed error logging
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        console.error("Error status:", error.response.status);
+        console.error("Error headers:", error.response.headers);
+      }
+
+      Swal.fire(
+        "Error!",
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to save rental item.",
+        "error"
+      );
     }
   };
 
   const getCategoryName = (categoryId) => {
-    return categories.find((cat) => cat.id === categoryId)?.name || "Unknown";
+    const category = categories.find((cat) => cat.id === categoryId);
+    return category ? category.name : "Unknown Category";
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "available":
-        return "success";
-      case "rented":
-        return "warning";
-      case "maintenance":
-        return "error";
-      default:
-        return "default";
+  const handleViewImage = (imageUrl, title) => {
+    if (!imageUrl) {
+      Swal.fire({
+        icon: "info",
+        title: "No Image",
+        text: "No product image available for this item.",
+      });
+      return;
+    }
+    setSelectedImage({ url: imageUrl, title });
+    setImageDialogOpen(true);
+  };
+
+  const handleDownloadImage = () => {
+    if (selectedImage.url) {
+      const link = document.createElement("a");
+      link.href = selectedImage.url;
+      link.download = `${selectedImage.title}_image.jpg`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
-  const getConditionColor = (condition) => {
-    switch (condition) {
-      case "excellent":
-        return "success";
-      case "good":
-        return "info";
-      case "fair":
-        return "warning";
-      case "poor":
-        return "error";
-      default:
-        return "default";
+  const handleOpenImageNewTab = () => {
+    if (selectedImage.url) {
+      window.open(selectedImage.url, "_blank");
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFormData((prev) => ({
+      ...prev,
+      imageFile: null,
+    }));
+    // Clear the file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = "";
     }
   };
 
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Item Name", width: 200 },
     {
-      field: "category_id",
+      field: "name",
+      headerName: "Item Name",
+      width: 200,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight="medium">
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "rental_id",
       headerName: "Category",
       width: 150,
       renderCell: (params) => (
-        <span>{getCategoryName(params.row.category_id)}</span>
+        <span>{getCategoryName(params.row.rental_id)}</span>
       ),
     },
     {
-      field: "price_per_day",
-      headerName: "Price/Day",
+      field: "price",
+      headerName: "Price",
       width: 120,
-      type: "number",
-      valueFormatter: (params) => {
-        return params && params.value ? `$${params.value.toFixed(2)}` : "$0.00";
-      },
+      renderCell: (params) => <span>${params.value || 0}</span>,
     },
     {
-      field: "quantity_info",
-      headerName: "Quantity",
+      field: "location",
+      headerName: "Location",
       width: 120,
-      renderCell: (params) => (
-        <span
-          className={
-            params.row.quantity_available === 0
-              ? "text-red-600 font-medium"
-              : ""
-          }>
-          {params.row.quantity_available}/{params.row.quantity_total}
-        </span>
-      ),
+      renderCell: (params) => <span>{params.value || "No Location"}</span>,
     },
     {
-      field: "condition",
-      headerName: "Condition",
+      field: "contact",
+      headerName: "Contact",
       width: 120,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          color={getConditionColor(params.value)}
-          size="small"
-        />
-      ),
+      renderCell: (params) => <span>{params.value || "No Contact"}</span>,
     },
     {
-      field: "status",
+      field: "is_ready",
       headerName: "Status",
-      width: 120,
+      width: 100,
       renderCell: (params) => (
         <Chip
-          label={params.value}
-          color={getStatusColor(params.value)}
+          label={params.value ? "Ready" : "Not Ready"}
+          color={params.value ? "success" : "error"}
           size="small"
         />
+      ),
+    },
+    {
+      field: "banner",
+      headerName: "Image",
+      width: 120,
+      renderCell: (params) => (
+        <div className="flex items-center space-x-1">
+          {params.value ? (
+            <Chip
+              label="View"
+              size="small"
+              color="primary"
+              icon={<ImageIcon />}
+              onClick={() => handleViewImage(params.value, params.row.name)}
+              style={{ cursor: "pointer" }}
+            />
+          ) : (
+            <Chip label="No Image" size="small" color="default" />
+          )}
+        </div>
       ),
     },
     {
@@ -325,6 +565,7 @@ function RentalTab() {
           loading={loading}
           checkboxSelection
           disableRowSelectionOnClick
+          getRowId={(row) => row.id || row.name || Math.random()}
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
@@ -332,6 +573,7 @@ function RentalTab() {
         />
       </div>
 
+      {/* Add/Edit Dialog */}
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -345,91 +587,189 @@ function RentalTab() {
             <TextField
               label="Item Name"
               fullWidth
+              required
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
+              error={!formData.name.trim()}
+              helperText={!formData.name.trim() ? "Item name is required" : ""}
             />
+
             <TextField
               label="Category"
               fullWidth
               select
-              value={formData.category_id}
+              required
+              value={formData.rental_id}
               onChange={(e) =>
-                setFormData({ ...formData, category_id: e.target.value })
-              }>
+                setFormData({ ...formData, rental_id: e.target.value })
+              }
+              error={!formData.rental_id}
+              helperText={!formData.rental_id ? "Category is required" : ""}>
+              <MenuItem value="">
+                <em>Select a category</em>
+              </MenuItem>
               {categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
                   {category.name}
                 </MenuItem>
               ))}
             </TextField>
+
             <TextField
-              label="Price per Day"
+              label="Price"
               fullWidth
               type="number"
+              required
               step="0.01"
-              value={formData.price_per_day}
+              value={formData.price}
               onChange={(e) =>
-                setFormData({ ...formData, price_per_day: e.target.value })
+                setFormData({ ...formData, price: e.target.value })
+              }
+              error={!formData.price || parseFloat(formData.price) <= 0}
+              helperText={
+                !formData.price || parseFloat(formData.price) <= 0
+                  ? "Valid price is required"
+                  : ""
               }
               InputProps={{
                 startAdornment: <span className="mr-1 text-gray-500">$</span>,
               }}
             />
+
             <TextField
-              label="Total Quantity"
+              label="Location"
               fullWidth
-              type="number"
-              value={formData.quantity_total}
+              value={formData.location}
               onChange={(e) =>
-                setFormData({ ...formData, quantity_total: e.target.value })
+                setFormData({ ...formData, location: e.target.value })
               }
+              placeholder="Item location"
             />
+
             <TextField
-              label="Available Quantity"
+              label="Contact"
               fullWidth
-              type="number"
-              value={formData.quantity_available}
+              value={formData.contact}
               onChange={(e) =>
-                setFormData({ ...formData, quantity_available: e.target.value })
+                setFormData({ ...formData, contact: e.target.value })
               }
+              placeholder="Contact information"
             />
-            <TextField
-              label="Condition"
-              fullWidth
-              select
-              value={formData.condition}
-              onChange={(e) =>
-                setFormData({ ...formData, condition: e.target.value })
-              }>
-              <MenuItem value="excellent">Excellent</MenuItem>
-              <MenuItem value="good">Good</MenuItem>
-              <MenuItem value="fair">Fair</MenuItem>
-              <MenuItem value="poor">Poor</MenuItem>
-            </TextField>
+
             <TextField
               label="Status"
               fullWidth
               select
-              value={formData.status}
+              value={formData.is_ready}
               onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
+                setFormData({ ...formData, is_ready: e.target.value })
               }>
-              <MenuItem value="available">Available</MenuItem>
-              <MenuItem value="rented">Rented</MenuItem>
-              <MenuItem value="maintenance">Maintenance</MenuItem>
-              <MenuItem value="discontinued">Discontinued</MenuItem>
+              <MenuItem value="true">Ready</MenuItem>
+              <MenuItem value="false">Not Ready</MenuItem>
             </TextField>
-            <TextField
-              label="Image URL"
-              fullWidth
-              value={formData.image_url}
-              onChange={(e) =>
-                setFormData({ ...formData, image_url: e.target.value })
-              }
-            />
+
+            {/* Image Section */}
+            <div className="col-span-2">
+              <Typography variant="subtitle2" gutterBottom>
+                Product Image (Optional)
+              </Typography>
+
+              {/* Current Image Display for Edit Mode */}
+              {editingRental && formData.banner && (
+                <Box mb={2} p={2} border="1px solid #e0e0e0" borderRadius={1}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    gutterBottom>
+                    Current Image:
+                  </Typography>
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src={formData.banner}
+                      alt="Current product"
+                      style={{
+                        width: 100,
+                        height: 60,
+                        objectFit: "cover",
+                        borderRadius: 4,
+                      }}
+                    />
+                    <Button
+                      size="small"
+                      startIcon={<Visibility />}
+                      onClick={() =>
+                        handleViewImage(formData.banner, formData.name)
+                      }>
+                      View Current
+                    </Button>
+                  </div>
+                </Box>
+              )}
+
+              {/* Image URL Input - only show if no file selected */}
+              {!formData.imageFile && (
+                <TextField
+                  label="Product Image URL"
+                  fullWidth
+                  value={formData.banner}
+                  onChange={(e) =>
+                    setFormData({ ...formData, banner: e.target.value })
+                  }
+                  margin="normal"
+                  helperText="Enter image URL or upload a file below"
+                  placeholder="https://example.com/image.jpg"
+                />
+              )}
+
+              {/* File Upload */}
+              <Box mt={2}>
+                <Typography variant="body2" color="textSecondary" gutterBottom>
+                  Or upload an image file:
+                </Typography>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  style={{ marginTop: 8 }}
+                  key={`file-input-${editingRental?.id || "new"}`}
+                />
+                <Typography
+                  variant="caption"
+                  display="block"
+                  color="textSecondary"
+                  mt={1}>
+                  Supported formats: JPG, PNG, GIF. Max size: 5MB
+                </Typography>
+              </Box>
+
+              {/* Show selected file info */}
+              {formData.imageFile && (
+                <Box mt={2} p={2} border="1px solid #2196f3" borderRadius={1}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Typography variant="body2" color="primary">
+                        File selected: {formData.imageFile.name}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        Size:{" "}
+                        {(formData.imageFile.size / 1024 / 1024).toFixed(2)} MB
+                        {editingRental && " (will replace current image)"}
+                      </Typography>
+                    </div>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={handleRemoveFile}>
+                      Remove File
+                    </Button>
+                  </div>
+                </Box>
+              )}
+            </div>
           </div>
+
           <TextField
             label="Description"
             fullWidth
@@ -440,18 +780,7 @@ function RentalTab() {
               setFormData({ ...formData, description: e.target.value })
             }
             margin="normal"
-          />
-          <TextField
-            label="Specifications"
-            fullWidth
-            multiline
-            rows={3}
-            value={formData.specifications}
-            onChange={(e) =>
-              setFormData({ ...formData, specifications: e.target.value })
-            }
-            margin="normal"
-            placeholder="Technical specifications, dimensions, features..."
+            placeholder="Describe the rental item..."
           />
         </DialogContent>
         <DialogActions>
@@ -460,6 +789,77 @@ function RentalTab() {
             {editingRental ? "Update" : "Add"}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Image Preview Dialog */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="md"
+        fullWidth>
+        <DialogTitle>
+          <div className="flex items-center justify-between">
+            <Typography variant="h6">
+              Product Image - {selectedImage.title}
+            </Typography>
+            <div className="flex space-x-1">
+              <IconButton
+                onClick={handleDownloadImage}
+                color="primary"
+                title="Download Image"
+                size="small">
+                <Download />
+              </IconButton>
+              <IconButton
+                onClick={handleOpenImageNewTab}
+                color="primary"
+                title="Open in New Tab"
+                size="small">
+                <OpenInNew />
+              </IconButton>
+              <IconButton
+                onClick={() => setImageDialogOpen(false)}
+                size="small">
+                <Close />
+              </IconButton>
+            </div>
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            style={{ minHeight: "300px" }}>
+            <CardMedia
+              component="img"
+              image={selectedImage.url}
+              alt="Product image"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "500px",
+                objectFit: "contain",
+                borderRadius: "8px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+              }}
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "block";
+              }}
+            />
+            <Box
+              display="none"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              style={{ minHeight: "300px" }}>
+              <ImageIcon style={{ fontSize: 64, color: "#ccc" }} />
+              <Typography variant="body1" color="textSecondary" mt={2}>
+                Failed to load product image
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
       </Dialog>
     </div>
   );

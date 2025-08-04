@@ -258,3 +258,237 @@ export const deleteBooth = async (boothId) => {
     method: "DELETE",
   });
 };
+
+export const getRentalCategories = async () => {
+  return apiCall("/rentals", {
+    method: "GET",
+  });
+};
+
+export const createRentalCategory = async (data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  // Check if data is FormData (for file uploads) or regular object
+  const isFormData = data instanceof FormData;
+
+  console.log("=== CREATE RENTAL CATEGORY API ===");
+  console.log("Base URL:", baseURL);
+  console.log("Is FormData:", isFormData);
+  console.log("Token exists:", !!token);
+
+  if (isFormData) {
+    console.log("FormData contents:");
+    for (let [key, value] of data.entries()) {
+      if (value instanceof File) {
+        console.log(
+          `${key}:`,
+          `File(${value.name}, ${value.size} bytes, ${value.type})`
+        );
+      } else {
+        console.log(`${key}:`, value);
+      }
+    }
+  } else {
+    console.log("Regular data:", data);
+  }
+
+  try {
+    const options = {
+      method: "POST",
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        // Don't set Content-Type for FormData - let browser handle it
+        ...(!isFormData && { "Content-Type": "application/json" }),
+      },
+      body: isFormData ? data : JSON.stringify(data),
+    };
+
+    console.log("Making request to:", `${baseURL}/rentals`);
+    console.log("Request options:", options);
+
+    const response = await fetch(`${baseURL}/rentals`, options);
+
+    console.log("Response status:", response.status);
+    console.log("Response headers:", response.headers);
+    console.log("Response content-type:", response.headers.get("content-type"));
+
+    // Check if response is HTML (error page)
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("text/html")) {
+      const htmlText = await response.text();
+      console.error(
+        "Received HTML instead of JSON:",
+        htmlText.substring(0, 500)
+      );
+      throw new Error(
+        `Server returned HTML instead of JSON. Status: ${response.status}`
+      );
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
+
+      try {
+        const errorJson = JSON.parse(errorText);
+        throw new Error(
+          errorJson.message ||
+            errorJson.error ||
+            "Failed to create rental category"
+        );
+      } catch (parseError) {
+        throw new Error(
+          `HTTP error! status: ${response.status}, response: ${errorText}`
+        );
+      }
+    }
+
+    const result = await response.json();
+    console.log("API Response:", result);
+    return result;
+  } catch (error) {
+    console.error("Create rental category error:", error);
+    throw error;
+  }
+};
+
+export const updateRentalCategory = async (id, data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  // Check if data is FormData (for file uploads) or regular object
+  const isFormData = data instanceof FormData;
+
+  console.log("=== UPDATE RENTAL CATEGORY API ===");
+  console.log("Category ID:", id);
+  console.log("Base URL:", baseURL);
+  console.log("Is FormData:", isFormData);
+
+  try {
+    const options = {
+      method: "PUT",
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...(!isFormData && { "Content-Type": "application/json" }),
+      },
+      body: isFormData ? data : JSON.stringify(data),
+    };
+
+    console.log("Making request to:", `${baseURL}/rentals/${id}`);
+
+    const response = await fetch(`${baseURL}/rentals/${id}`, options);
+
+    console.log("Response status:", response.status);
+    console.log("Response content-type:", response.headers.get("content-type"));
+
+    // Check if response is HTML (error page)
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("text/html")) {
+      const htmlText = await response.text();
+      console.error(
+        "Received HTML instead of JSON:",
+        htmlText.substring(0, 500)
+      );
+      throw new Error(
+        `Server returned HTML instead of JSON. Status: ${response.status}`
+      );
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
+
+      try {
+        const errorJson = JSON.parse(errorText);
+        throw new Error(
+          errorJson.message ||
+            errorJson.error ||
+            "Failed to update rental category"
+        );
+      } catch (parseError) {
+        throw new Error(
+          `HTTP error! status: ${response.status}, response: ${errorText}`
+        );
+      }
+    }
+
+    const result = await response.json();
+    console.log("API Response:", result);
+    return result;
+  } catch (error) {
+    console.error("Update rental category error:", error);
+    throw error;
+  }
+};
+
+export const deleteRentalCategory = async (categoryId) => {
+  return apiCall(`/rentals/${categoryId}`, {
+    method: "DELETE",
+  });
+};
+
+export const getRentalProducts = async () => {
+  return apiCall("/rental-products", {
+    method: "GET",
+  });
+};
+
+// In your models/admin.js, update the endpoints
+export const createRentalProduct = async (data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  const isFormData = data instanceof FormData;
+
+  const options = {
+    method: "POST",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  };
+
+  // Changed endpoint from /rentals to /rental-products
+  const response = await fetch(`${baseURL}/rental-products`, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to create rental product");
+  }
+
+  return await response.json();
+};
+
+export const updateRentalProduct = async (id, data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+
+  const isFormData = data instanceof FormData;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  };
+
+  // Changed endpoint
+  const response = await fetch(`${baseURL}/rental-products/${id}`, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update rental product");
+  }
+
+  return await response.json();
+};
+
+export const deleteRentalProduct = async (productId) => {
+  return apiCall(`/rental-products/${productId}`, {
+    method: "DELETE",
+  });
+};

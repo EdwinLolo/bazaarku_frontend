@@ -71,11 +71,11 @@ function AdminSidebar() {
       label: "Rentals",
       icon: Package,
     },
-    {
-      path: "/admin/applications",
-      label: "Applications",
-      icon: FileText,
-    },
+    // {
+    //   path: "/admin/applications",
+    //   label: "Applications",
+    //   icon: FileText,
+    // },
   ];
 
   // Check if current path is active

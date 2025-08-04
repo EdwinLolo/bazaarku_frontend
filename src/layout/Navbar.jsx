@@ -13,6 +13,7 @@ const Navbar = () => {
     const [showLogin, setShowLogin] = useState(false);
     const [showCreate, setShowCreate] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [vendorId, setVendorId] = useState(null);
 
     const dropdownRef = useRef(null);
 
@@ -53,6 +54,27 @@ const Navbar = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        const fetchVendorId = async () => {
+            if (isAuthenticated && user?.role === "vendor") {
+                try {
+                    const response = await fetch(`${getBaseUrl()}/vendors/user/${user.id}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch vendor data');
+                    }
+                    const data = await response.json();
+                    if (data && data.id) {
+                        setVendorId(data.id);
+                    }
+                } catch (error) {
+                    console.error("Error fetching vendor data:", error);
+                }
+            }
+        };
+
+        fetchVendorId();
+    }, [isAuthenticated, user]);
 
     return (
         <>
@@ -136,6 +158,15 @@ const Navbar = () => {
                                                         className="w-full text-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
                                                     >
                                                         Admin Dashboard
+                                                    </Link>
+                                                )}
+                                                {user?.role === "vendor" && (
+                                                    <Link
+                                                        to={`/vendors/${vendorId}`}
+                                                        onClick={() => setIsDropdownOpen(false)}
+                                                        className="w-full text-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
+                                                    >
+                                                        Your Vendor Page
                                                     </Link>
                                                 )}
                                                 <button

@@ -20,20 +20,20 @@ const RentalProductPopup = ({ product, onClose }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
             <div
-                className="absolute inset-0 pointer-events-auto bg-black/50" // CHANGE: Removed backdrop-blur-sm
+                className="absolute inset-0 pointer-events-auto bg-black/50"
                 onClick={onClose}
             />
-            <div className="relative w-full max-w-5xl mx-4 bg-white shadow-lg pointer-events-auto max-h-[90vh] rounded-xl overflow-y-auto scroll-hidden"> {/* CHANGE: shadow-2xl to shadow-lg */}
+            <div className="relative w-full max-w-5xl mx-4 bg-white shadow-lg pointer-events-auto max-h-[90vh] rounded-xl overflow-y-auto scroll-hidden">
                 <button
                     onClick={onClose}
-                    className="cursor-pointer sticky top-4 right-4 z-20 p-2 bg-white/80 hover:bg-gray-100 text-gray-600 hover:text-red-500 transition-colors rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 float-right"
+                    className="cursor-pointer absolute top-4 right-4 z-20 p-2 bg-white/80 hover:bg-gray-100 text-gray-600 hover:text-red-500 transition-colors rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 float-right"
                 >
                     <X size={24} strokeWidth={2.5} />
                 </button>
 
-                <div>
+                <div className="flex flex-col w-full h-full p-0 m-0">
                     {/* Image Section */}
-                    <div className="w-full h-[40vh] bg-gray-100">
+                    <div className="w-full h-[65vh] bg-gray-100">
                         <img
                             src={product?.banner || TempImage}
                             alt={product?.name}

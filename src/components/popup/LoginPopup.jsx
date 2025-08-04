@@ -128,17 +128,17 @@ function LoginPopup({ onClose, onRegisterClick }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
             <div
                 className="absolute inset-0 pointer-events-auto backdrop-blur-sm bg-black/50"
-                onClick={onClose}
+                onClick={!isLoading ? onClose : undefined}
             />
             <div className="relative w-full max-w-md mx-4 bg-white shadow-2xl pointer-events-auto rounded-xl">
                 <div className="p-6">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl font-bold">Sign in with email</h2>
                         <button
-                            onClick={onClose}
-                            className="p-1 text-gray-500 transition-colors rounded-full cursor-pointer hover:text-gray-700 hover:bg-gray-100"
+                            onClick={!isLoading ? onClose : undefined}
+                            className="cursor-pointer absolute top-4 right-4 z-20 p-2 bg-white/80 hover:bg-gray-100 text-gray-600 hover:text-red-500 transition-colors rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 float-right"
                         >
-                            <X size={24} />
+                            <X size={24} strokeWidth={2.5} />
                         </button>
                     </div>
                     <form onSubmit={handleSubmit}>
@@ -165,8 +165,8 @@ function LoginPopup({ onClose, onRegisterClick }) {
                                     value={formData.email}
                                     onChange={handleChange}
                                     className={`w-full py-2 pl-10 pr-3 border rounded-lg focus:ring-2 focus:outline-none ${errors.email
-                                            ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                                        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                                         }`}
                                     placeholder="you@example.com"
                                     disabled={isLoading}
@@ -193,8 +193,8 @@ function LoginPopup({ onClose, onRegisterClick }) {
                                     value={formData.password}
                                     onChange={handleChange}
                                     className={`w-full py-2 pl-10 pr-12 border rounded-lg focus:ring-2 focus:outline-none ${errors.password
-                                            ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                                            : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                                        : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                                         }`}
                                     placeholder="••••••••"
                                     disabled={isLoading}

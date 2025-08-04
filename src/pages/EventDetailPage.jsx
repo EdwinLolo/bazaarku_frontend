@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Calendar, Users, Store, Phone } from "lucide-react";
+import { MapPin, Calendar, Users, Store, Phone, CircleAlert, RefreshCw } from "lucide-react";
 import { FaWhatsapp } from 'react-icons/fa';
 import { getBaseUrl } from "../models/utils";
 import Loading from "../components/Loading";
-import { Alert } from "@mui/material";
+import ApplyBoothPopup from "../components/popup/ApplyBoothPopup";
+import ErrorDisplay from "../components/ErrorDisplay";
 
 const EventDetailPage = () => {
     const { id } = useParams();
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -48,19 +51,7 @@ const EventDetailPage = () => {
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 text-gray-900 antialiased">
-                <div className="bg-white/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-md w-full">
-                    <Alert severity="error" sx={{ width: "100%", mb: 2, fontSize: 18 }}>
-                        {error}
-                    </Alert>
-                    <button
-                        className="mt-2 px-6 py-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition"
-                        onClick={() => window.location.reload()}
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
+            <ErrorDisplay error={error} onRetry={() => window.location.reload()} />
         );
     }
 
@@ -102,11 +93,6 @@ const EventDetailPage = () => {
     const totalBooths = event.total_booths;
     const bookedBooths = event.accepted_booths;
     const availableBooths = totalBooths - bookedBooths;
-
-    const handleApplyForBooth = () => {
-        // TODO: Implement booth application logic
-        alert('Booth application feature coming soon!');
-    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -196,7 +182,10 @@ const EventDetailPage = () => {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={handleApplyForBooth}
+                                    onClick={() => {
+                                        setSelectedEvent(event);
+                                        setShowPopup(true);
+                                    }}
                                     className="inline-flex items-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 >
                                     <Store className="h-5 w-5 mr-2" />
@@ -281,6 +270,13 @@ const EventDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            {showPopup && (
+                <ApplyBoothPopup
+                    event={selectedEvent}
+                    onClose={() => setShowPopup(false)}
+                />
+            )}
         </div>
     );
 };

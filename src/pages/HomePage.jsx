@@ -100,7 +100,7 @@ function Home() {
             </div>
 
             <section className="mb-16 px-4 md:px-12">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <h2 className="text-3xl md:text-4xl font-extrabold text-primary leading-tight">Upcoming Events</h2>
                     <Link
                         to="/events"
@@ -110,9 +110,9 @@ function Home() {
                         <ArrowRight size={20} />
                     </Link>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {events && events.length > 0 ? (
-                        events.map(event => (
+                {events && events.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                        {events.map(event => (
                             <EventCard
                                 key={event.id}
                                 imageUrl={event.banner || TempImage}
@@ -122,11 +122,11 @@ function Home() {
                                 end_date={event.end_date}
                                 id={event.id}
                             />
-                        ))
-                    ) : (
-                        <p className="text-gray-500 italic">No upcoming events at the moment.</p>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-gray-500 italic">No upcoming events at the moment.</p>
+                )}
             </section>
 
             <section className="mb-16 px-4 md:px-12">
@@ -140,9 +140,9 @@ function Home() {
                         <ArrowRight size={20} />
                     </Link>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-8 auto-rows-fr">
-                    {rentals && rentals.length > 0 ? (
-                        rentals.map((rental, index) => {
+                {rentals && rentals.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-8 auto-rows-fr">
+                        {rentals.map((rental, index) => {
                             let colSpanClass;
                             const patternIndex = index % 3;
 
@@ -162,12 +162,12 @@ function Home() {
                                     className={`h-56 sm:h-64 md:h-72 ${colSpanClass}`}
                                     id={rental.id}
                                 />
-                            );
-                        })
-                    ) : (
-                        <p className="text-gray-500 italic">No rentals available at the moment.</p>
-                    )}
-                </div>
+                            )
+                        })}
+                    </div>
+                ) : (
+                    <p className="text-gray-500 italic">No rentals available at the moment.</p>
+                )}
             </section>
         </div>
     );

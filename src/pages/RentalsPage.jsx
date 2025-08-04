@@ -96,13 +96,13 @@ function RentalsPage() {
                                     />
                                 ))
                             ) : (
-                                <p>No products available for this rental.</p>
+                                <p className="text-gray-500 italic">No products available for this rental.</p>
                             )}
                         </div>
                     </section>
                 ))
             ) : (
-                <p className="text-center text-lg mt-10">No rentals found.</p>
+                <p className="text-gray-500 italic px-4 md:px-12">No rentals found...</p>
             )}
 
             {showPopup && (

@@ -4,7 +4,7 @@ import Logo from '../assets/logo.png';
 
 const App = () => {
     return (
-        <footer className="bg-primary text-white p-4 sm:px-8 md:px-12 lg:px-16">
+        <footer className="bg-primary text-white py-4 px-4 sm:px-8 md:px-12 lg:px-14">
             <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-0 sm:gap-8">
                 {/* Logo Section */}
                 <div className="flex items-center mb-6 lg:mb-0">

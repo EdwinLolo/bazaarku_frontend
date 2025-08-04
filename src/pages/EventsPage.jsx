@@ -248,24 +248,22 @@ function EventsPage() {
                         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-800"></div>
                         <p className="mt-4 text-lg font-bold text-primary">Loading Events...</p>
                     </div>
-                ) : (
+                ) : events.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {events.length > 0 ? (
-                            events.map((event) => (
-                                <EventCard
-                                    id={event.id}
-                                    key={event.id}
-                                    imageUrl={event.banner}
-                                    name={event.name}
-                                    location={event.location}
-                                    start_date={event.start_date}
-                                    end_date={event.end_date}
-                                />
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">No events found.</p>
-                        )}
+                        {events.map((event) => (
+                            <EventCard
+                                id={event.id}
+                                key={event.id}
+                                imageUrl={event.banner}
+                                name={event.name}
+                                location={event.location}
+                                start_date={event.start_date}
+                                end_date={event.end_date}
+                            />
+                        ))}
                     </div>
+                ) : (
+                    <p className="text-gray-500 italic">No events found...</p>
                 )}
                 {/* Event Pagination */}
                 <PaginationControls currentPage={eventPage} totalPages={totalEventPages} setPage={setEventPage} />
@@ -275,22 +273,20 @@ function EventsPage() {
                 <h1 className="text-4xl text-primary font-bold mb-4">Vendors</h1>
                 {loadingVendors ? (
                     <Loading message="Loading vendors..." />
-                ) : (
+                ) : vendors.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {vendors.length > 0 ? (
-                            vendors.map((vendor) => (
-                                <VendorCard
-                                    key={vendor.id}
-                                    imageUrl={vendor.banner}
-                                    name={vendor.name}
-                                    location={vendor.location}
-                                    id={vendor.id}
-                                />
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">No vendors found.</p>
-                        )}
+                        {vendors.map((vendor) => (
+                            <VendorCard
+                                key={vendor.id}
+                                imageUrl={vendor.banner}
+                                name={vendor.name}
+                                location={vendor.location}
+                                id={vendor.id}
+                            />
+                        ))}
                     </div>
+                ) : (
+                   <p className="text-gray-500 italic">No vendor found...</p>
                 )}
                 {/* Vendor Pagination */}
                 <PaginationControls currentPage={vendorPage} totalPages={totalVendorPages} setPage={setVendorPage} />

@@ -162,7 +162,7 @@ function CreateAccountPopup({ onClose, onLoginClick }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none font-inter">
             <div
                 className="absolute inset-0 pointer-events-auto backdrop-blur-sm bg-black/50"
-                onClick={onClose}
+                onClick={!isLoading ? onClose : undefined}
             />
             <div className="relative flex flex-col w-full max-w-md overflow-hidden bg-white shadow-lg pointer-events-auto rounded-xl md:max-w-3xl lg:max-w-4xl lg:flex-row">
                 {/* Left half - Logo section */}
@@ -181,10 +181,10 @@ function CreateAccountPopup({ onClose, onLoginClick }) {
                             Create an account
                         </h2>
                         <button
-                            onClick={onClose}
-                            className="p-1 text-gray-500 transition-colors rounded-full cursor-pointer hover:text-gray-700 hover:bg-gray-100"
+                            onClick={!isLoading ? onClose : undefined}
+                            className="cursor-pointer absolute top-4 right-4 z-20 p-2 bg-white/80 hover:bg-gray-100 text-gray-600 hover:text-red-500 transition-colors rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 float-right"
                             disabled={isLoading}>
-                            <X size={24} />
+                            <X size={24} strokeWidth={2.5} />
                         </button>
                     </div>
 

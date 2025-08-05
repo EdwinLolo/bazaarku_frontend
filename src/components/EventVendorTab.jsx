@@ -127,6 +127,7 @@ function EventVendorTab() {
           icon: "error",
           title: "File Too Large",
           text: "Please select an image smaller than 10MB.",
+          target: "#event-vendor-form-dialog",
         });
         e.target.value = "";
         return;
@@ -159,6 +160,7 @@ function EventVendorTab() {
           icon: "error",
           title: "Compression Failed",
           text: "Failed to process the image. Please try a different image.",
+          target: "#event-vendor-form-dialog",
         });
       }
     }
@@ -214,7 +216,11 @@ function EventVendorTab() {
         Swal.fire("Deleted!", "Vendor has been deleted.", "success");
       } catch (error) {
         console.error("Delete error:", error);
-        Swal.fire("Error!", "Failed to delete vendor.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete vendor.",
+        });
       }
     }
   };
@@ -223,11 +229,21 @@ function EventVendorTab() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        Swal.fire("Error!", "Vendor name is required.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Vendor name is required.",
+          target: "#event-vendor-form-dialog",
+        });
         return;
       }
       if (!formData.user_id) {
-        Swal.fire("Error!", "Please select a user for this vendor.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Please select a user for this vendor.",
+          target: "#event-vendor-form-dialog",
+        });
         return;
       }
 
@@ -403,7 +419,12 @@ function EventVendorTab() {
       fetchVendors();
     } catch (error) {
       console.error("Submit error:", error);
-      Swal.fire("Error!", error.message || "Failed to save vendor.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.message || "Failed to save vendor.",
+        target: "#event-vendor-form-dialog",
+      });
     }
   };
 
@@ -612,7 +633,8 @@ function EventVendorTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="md"
-        fullWidth>
+        fullWidth
+        id="event-vendor-form-dialog">
         <DialogTitle>
           {editingVendor ? "Edit Vendor" : "Add New Vendor"}
         </DialogTitle>

@@ -116,7 +116,11 @@ function EventBoothTab() {
         Swal.fire("Deleted!", "Booth application has been deleted.", "success");
       } catch (error) {
         console.error("Delete error:", error);
-        Swal.fire("Error!", "Failed to delete booth application.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete booth application.",
+        });
       }
     }
   };
@@ -139,7 +143,11 @@ function EventBoothTab() {
       );
     } catch (error) {
       console.error("Status update error:", error);
-      Swal.fire("Error!", "Failed to update status.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to update status.",
+      });
     }
   };
 
@@ -147,15 +155,30 @@ function EventBoothTab() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        Swal.fire("Error!", "Applicant name is required.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Applicant name is required.",
+          target: "#event-booth-form-dialog",
+        });
         return;
       }
       if (!formData.event_id) {
-        Swal.fire("Error!", "Please select an event.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Please select an event.",
+          target: "#event-booth-form-dialog",
+        });
         return;
       }
       if (!formData.phone.trim()) {
-        Swal.fire("Error!", "Phone number is required.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Phone number is required.",
+          target: "#event-booth-form-dialog",
+        });
         return;
       }
 
@@ -217,11 +240,12 @@ function EventBoothTab() {
       setDialogOpen(false);
     } catch (error) {
       console.error("Submit error:", error);
-      Swal.fire(
-        "Error!",
-        error.message || "Failed to save booth application.",
-        "error"
-      );
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.message || "Failed to save booth application.",
+        target: "#event-booth-form-dialog",
+      });
     }
   };
 
@@ -403,7 +427,8 @@ function EventBoothTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="md"
-        fullWidth>
+        fullWidth
+        id="event-booth-form-dialog">
         <DialogTitle>
           {editingBooth
             ? "Edit Booth Application"

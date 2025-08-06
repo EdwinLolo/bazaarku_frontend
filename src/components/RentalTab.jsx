@@ -107,6 +107,7 @@ function RentalTab() {
           icon: "error",
           title: "File Too Large",
           text: "Please select an image smaller than 5MB.",
+          target: "#rental-form-dialog",
         });
         e.target.value = "";
         return;
@@ -118,6 +119,7 @@ function RentalTab() {
           icon: "error",
           title: "Invalid File Type",
           text: "Please select a valid image file (JPG, PNG, GIF, etc.).",
+          target: "#rental-form-dialog",
         });
         e.target.value = "";
         return;
@@ -191,7 +193,11 @@ function RentalTab() {
         Swal.fire("Deleted!", "Rental item has been deleted.", "success");
       } catch (error) {
         console.error("Delete error:", error);
-        Swal.fire("Error!", "Failed to delete rental item.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete rental item.",
+        });
       }
     }
   };
@@ -200,15 +206,30 @@ function RentalTab() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        Swal.fire("Error!", "Item name is required.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Item name is required.",
+          target: "#rental-form-dialog",
+        });
         return;
       }
       if (!formData.rental_id) {
-        Swal.fire("Error!", "Please select a category.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Please select a category.",
+          target: "#rental-form-dialog",
+        });
         return;
       }
       if (!formData.price || parseFloat(formData.price) <= 0) {
-        Swal.fire("Error!", "Please enter a valid price.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Please enter a valid price.",
+          target: "#rental-form-dialog",
+        });
         return;
       }
 
@@ -388,13 +409,14 @@ function RentalTab() {
         console.error("Error headers:", error.response.headers);
       }
 
-      Swal.fire(
-        "Error!",
-        error.response?.data?.message ||
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.response?.data?.message ||
           error.message ||
           "Failed to save rental item.",
-        "error"
-      );
+        target: "#rental-form-dialog",
+      });
     }
   };
 
@@ -578,7 +600,8 @@ function RentalTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="md"
-        fullWidth>
+        fullWidth
+        id="rental-form-dialog">
         <DialogTitle>
           {editingRental ? "Edit Rental Item" : "Add New Rental Item"}
         </DialogTitle>

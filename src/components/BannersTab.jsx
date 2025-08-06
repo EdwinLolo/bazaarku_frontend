@@ -66,7 +66,11 @@ function BannersTab() {
     } catch (error) {
       console.error("Error fetching banners:", error);
       setBanners([]);
-      Swal.fire("Error!", "Failed to fetch banners.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to fetch banners.",
+      });
     } finally {
       setLoading(false);
     }
@@ -84,6 +88,7 @@ function BannersTab() {
           icon: "error",
           title: "File Too Large",
           text: "Please select an image smaller than 5MB.",
+          target: "#banners-form-dialog",
         });
         e.target.value = "";
         return;
@@ -95,6 +100,7 @@ function BannersTab() {
           icon: "error",
           title: "Invalid File Type",
           text: "Please select a valid image file (JPG, PNG, GIF, etc.).",
+          target: "#banners-form-dialog",
         });
         e.target.value = "";
         return;
@@ -157,7 +163,11 @@ function BannersTab() {
         Swal.fire("Deleted!", "Banner has been deleted.", "success");
       } catch (error) {
         console.error("Delete error:", error);
-        Swal.fire("Error!", "Failed to delete banner.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete banner.",
+        });
       }
     }
   };
@@ -166,7 +176,12 @@ function BannersTab() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        Swal.fire("Error!", "Banner name is required.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Banner name is required.",
+          target: "#banners-form-dialog",
+        });
         return;
       }
 
@@ -268,13 +283,14 @@ function BannersTab() {
     } catch (error) {
       console.error("Submit error:", error);
 
-      Swal.fire(
-        "Error!",
-        error.response?.data?.message ||
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.response?.data?.message ||
           error.message ||
           "Failed to save banner.",
-        "error"
-      );
+        target: "#banners-form-dialog",
+      });
     }
   };
 
@@ -457,7 +473,8 @@ function BannersTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="md"
-        fullWidth>
+        fullWidth
+        id="banners-form-dialog">
         <DialogTitle>
           {editingBanner ? "Edit Banner" : "Add New Banner"}
         </DialogTitle>

@@ -41,12 +41,13 @@ export default function AdminAddUser() {
     });
   };
 
-  const showErrorAlert = (message) => {
+  const showErrorAlert = (message, target = null) => {
     Swal.fire({
       icon: "error",
       title: "Error!",
       text: message,
       confirmButtonColor: "#d33",
+      target: target,
     });
   };
 
@@ -259,7 +260,10 @@ export default function AdminAddUser() {
       console.error("Error saving user:", error);
 
       // Show error alert
-      showErrorAlert(error.message || "Failed to save user. Please try again.");
+      showErrorAlert(
+        error.message || "Failed to save user. Please try again.",
+        "#user-form-dialog"
+      );
     }
   };
 
@@ -461,6 +465,7 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
         title: "Validation Error",
         text: "Please fill in all required fields correctly.",
         confirmButtonColor: "#f39c12",
+        target: "#user-form-dialog",
       });
       return;
     }
@@ -487,6 +492,7 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
         text:
           error.message || "An unexpected error occurred. Please try again.",
         confirmButtonColor: "#d33",
+        target: "#user-form-dialog",
       });
     } finally {
       setIsSubmitting(false);
@@ -505,7 +511,7 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth id="user-form-dialog">
       <DialogTitle>{user?.id ? "Edit User" : "Add New User"}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>

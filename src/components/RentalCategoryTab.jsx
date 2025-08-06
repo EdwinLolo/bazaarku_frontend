@@ -83,6 +83,7 @@ function RentalCategoryTab() {
           icon: "error",
           title: "File Too Large",
           text: "Please select an image smaller than 5MB.",
+          target: "#rental-category-form-dialog",
         });
         e.target.value = "";
         return;
@@ -94,6 +95,7 @@ function RentalCategoryTab() {
           icon: "error",
           title: "Invalid File Type",
           text: "Please select a valid image file (JPG, PNG, GIF, etc.).",
+          target: "#rental-category-form-dialog",
         });
         e.target.value = "";
         return;
@@ -153,7 +155,11 @@ function RentalCategoryTab() {
         Swal.fire("Deleted!", "Category has been deleted.", "success");
       } catch (error) {
         console.error("Delete error:", error);
-        Swal.fire("Error!", "Failed to delete category.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete category.",
+        });
       }
     }
   };
@@ -162,7 +168,12 @@ function RentalCategoryTab() {
     try {
       // Validation
       if (!formData.name.trim()) {
-        Swal.fire("Error!", "Category name is required.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Category name is required.",
+          target: "#rental-category-form-dialog",
+        });
         return;
       }
 
@@ -316,7 +327,12 @@ function RentalCategoryTab() {
       setDialogOpen(false);
     } catch (error) {
       console.error("Submit error:", error);
-      Swal.fire("Error!", error.message || "Failed to save category.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.message || "Failed to save category.",
+        target: "#rental-category-form-dialog",
+      });
     }
   };
 
@@ -467,7 +483,8 @@ function RentalCategoryTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="md"
-        fullWidth>
+        fullWidth
+        id="rental-category-form-dialog">
         <DialogTitle>
           {editingCategory ? "Edit Category" : "Add New Category"}
         </DialogTitle>

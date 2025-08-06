@@ -36,6 +36,7 @@ const Navbar = () => {
             await logoutAPI();
             logout();
             setIsDropdownOpen(false);
+            navigate("/");
         } catch (error) {
             console.error("Logout error:", error);
             // Even if API fails, clear local state

@@ -78,7 +78,11 @@ function EventCategoryTab() {
         setCategories((prev) => prev.filter((cat) => cat.id !== id));
         Swal.fire("Deleted!", "Category has been deleted.", "success");
       } catch (error) {
-        Swal.fire("Error!", "Failed to delete category.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete category.",
+        });
       }
     }
   };
@@ -103,7 +107,12 @@ function EventCategoryTab() {
       }
       setDialogOpen(false);
     } catch (error) {
-      Swal.fire("Error!", "Failed to save category.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to save category.",
+        target: "#event-category-form-dialog",
+      });
     }
   };
 
@@ -174,7 +183,8 @@ function EventCategoryTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="sm"
-        fullWidth>
+        fullWidth
+        id="event-category-form-dialog">
         <DialogTitle>
           {editingCategory ? "Edit Category" : "Add New Category"}
         </DialogTitle>

@@ -78,7 +78,11 @@ function EventAreaTab() {
         setAreas((prev) => prev.filter((area) => area.id !== id));
         Swal.fire("Deleted!", "Area has been deleted.", "success");
       } catch (error) {
-        Swal.fire("Error!", "Failed to delete area.", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete area.",
+        });
       }
     }
   };
@@ -105,7 +109,12 @@ function EventAreaTab() {
       }
       setDialogOpen(false);
     } catch (error) {
-      Swal.fire("Error!", "Failed to save area.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to save area.",
+        target: "#event-area-form-dialog",
+      });
     }
   };
 
@@ -171,7 +180,8 @@ function EventAreaTab() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         maxWidth="sm"
-        fullWidth>
+        fullWidth
+        id="event-area-form-dialog">
         <DialogTitle>{editingArea ? "Edit Area" : "Add New Area"}</DialogTitle>
         <DialogContent className="space-y-4">
           <TextField

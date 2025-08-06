@@ -46,6 +46,8 @@ function VendorPage() {
 
                     setVendor(vendorData);
                     setFormData(vendorData);
+
+                    console.log("Fetched vendor data:", vendorData);
                 } else {
                     setError(data.message || 'Vendor not found.');
                 }
@@ -256,7 +258,7 @@ function VendorPage() {
                                             <EventCard
                                                 key={event.id}
                                                 id={event.id}
-                                                imageUrl={event.imageUrl}
+                                                imageUrl={event.banner}
                                                 name={event.name}
                                                 location={event.location}
                                                 start_date={event.start_date}
@@ -285,8 +287,9 @@ function VendorPage() {
                                             </div>
                                         </div>
 
-                                        <div
+                                        <a
                                             target="_blank"
+                                            rel="noopener noreferrer"
                                             href={`https://wa.me/${vendor.phone}`}
                                             className="flex items-start cursor-pointer"
                                         >
@@ -297,7 +300,7 @@ function VendorPage() {
                                                 <h3 className="font-medium text-gray-900">Whatsapp Number</h3>
                                                 <p className="text-gray-600">{vendor.phone}</p>
                                             </div>
-                                        </div>
+                                        </a>
 
                                         <div className="flex items-start">
                                             <div className="bg-blue-100 p-3 rounded-lg mr-4">

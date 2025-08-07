@@ -21,6 +21,7 @@ function AdminSidebar() {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   // Get user data from localStorage
   const getUserData = () => {
@@ -37,14 +38,16 @@ function AdminSidebar() {
 
   const handleLogout = async () => {
     try {
+      setLogoutLoading(true);
       await logoutAPI();
       logout();
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if API fails, clear local state
       logout();
       navigate("/");
+    } finally {
+      setLogoutLoading(false);
     }
   };
 
@@ -191,13 +194,30 @@ function AdminSidebar() {
 
           <button
             onClick={handleLogout}
+            disabled={logoutLoading}
             className={`
-              flex items-center w-full px-3 py-2 text-sm font-medium text-red-300 rounded-lg hover:bg-red-600 hover:text-white transition-colors
+              flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors
+              ${
+                logoutLoading
+                  ? "bg-red-600 text-white opacity-70 cursor-not-allowed"
+                  : "text-red-300 hover:bg-red-600 hover:text-white"
+              }
               ${isCollapsed ? "justify-center" : ""}
             `}
             title={isCollapsed ? "Logout" : ""}>
-            <LogOut size={20} className="flex-shrink-0" />
-            {!isCollapsed && <span className="ml-3">Logout</span>}
+            {logoutLoading ? (
+              <span
+                className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-red-200 rounded-full mr-2"
+                style={{ borderRightColor: "transparent" }}
+              />
+            ) : (
+              <LogOut size={20} className="flex-shrink-0" />
+            )}
+            {!isCollapsed && (
+              <span className="ml-3">
+                {logoutLoading ? "Logging out..." : "Logout"}
+              </span>
+            )}
           </button>
         </div>
       </aside>

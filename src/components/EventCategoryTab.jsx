@@ -44,7 +44,7 @@ function EventCategoryTab() {
     try {
       // Replace with actual API call
       const mockData = await getEventData();
-      console.log("Fetched categories:", mockData);
+      // console.log("Fetched categories:", mockData);
       setCategories(mockData.data);
     } catch (error) {
       console.error("Error fetching categories:", error);

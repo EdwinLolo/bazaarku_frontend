@@ -129,7 +129,7 @@ export default function AdminAddUser() {
       setLoading(true);
       setError(null);
       const data = await getUserData();
-      console.log("Admin dashboard data:", data);
+      // console.log("Admin dashboard data:", data);
 
       const transformedData = data.map((item, index) => {
         // Extract the ID from various possible locations
@@ -158,7 +158,7 @@ export default function AdminAddUser() {
         };
       });
 
-      console.log("Transformed data:", transformedData);
+      // console.log("Transformed data:", transformedData);
       setRows(transformedData);
     } catch (err) {
       console.error("Error fetching admin dashboard data:", err);
@@ -313,80 +313,93 @@ export default function AdminAddUser() {
   }
 
   return (
-    <div className="pt-0 px-2.5 sm:px-10 md:px-14 lg:px-20 flex flex-col items-center mx-auto">
-      <div className="w-full flex flex-col items-end mb-4 mr-1.5">
-        <button
-          onClick={handleAddUser}
-          className="flex items-center gap-2 px-4 py-2 font-semibold text-white transition-colors duration-200 bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg">
-          <Plus size={20} />
-          Add User
-        </button>
+    <div>
+      <div className="p-6 bg-white rounded-lg shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Add Users</h1>
+            <p className="mt-1 text-gray-600">
+              Manage users, roles, and permissions for your application.
+            </p>
+          </div>
+        </div>
       </div>
-      <Paper sx={{ height: 600, width: "100%" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{ pagination: { paginationModel } }}
-          pageSizeOptions={[5, 10, 25]}
-          checkboxSelection
-          sx={{ border: 0 }}
-          getRowId={(row) => {
-            console.log("Row ID:", row);
-            return (
-              row.id ||
-              row.user?.id ||
-              row.profile?.user_id ||
-              row.id ||
-              `fallback-${Math.random()}`
-            );
-          }}
-        />
-      </Paper>
-
-      {/* Edit Dialog */}
-      <EditUserDialog
-        open={editDialog.open}
-        user={editDialog.user}
-        onClose={() => setEditDialog({ open: false, user: null })}
-        onSubmit={handleEditSubmit}
-      />
-
-      <Dialog
-        open={deleteLoading}
-        PaperProps={{ className: "shadow-none bg-transparent" }}>
-        <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
-          <span
-            className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
-            style={{ borderRightColor: "transparent" }}
+      <div className="mt-6 flex flex-col items-center mx-auto">
+        <div className="w-full flex flex-col items-end mb-4 mr-1.5">
+          <button
+            onClick={handleAddUser}
+            className="flex items-center gap-2 px-4 py-2 font-semibold text-white transition-colors duration-200 bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 hover:shadow-lg">
+            <Plus size={20} />
+            Add User
+          </button>
+        </div>
+        <Paper sx={{ height: 600, width: "100%" }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            initialState={{ pagination: { paginationModel } }}
+            pageSizeOptions={[5, 10, 25]}
+            checkboxSelection
+            sx={{ border: 0 }}
+            getRowId={(row) => {
+              // console.log("Row ID:", row);
+              return (
+                row.id ||
+                row.user?.id ||
+                row.profile?.user_id ||
+                row.id ||
+                `fallback-${Math.random()}`
+              );
+            }}
           />
-          <span className="text-lg font-semibold text-red-700">
-            Deleting User...
-          </span>
-        </Box>
-      </Dialog>
+        </Paper>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, user: null })}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete user "
-          {deleteDialog.user?.name || deleteDialog.user?.email}"? This action
-          cannot be undone.
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, user: null })}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            color="error"
-            variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* Edit Dialog */}
+        <EditUserDialog
+          open={editDialog.open}
+          user={editDialog.user}
+          onClose={() => setEditDialog({ open: false, user: null })}
+          onSubmit={handleEditSubmit}
+        />
+
+        <Dialog
+          open={deleteLoading}
+          PaperProps={{ className: "shadow-none bg-transparent" }}>
+          <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
+            <span
+              className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
+              style={{ borderRightColor: "transparent" }}
+            />
+            <span className="text-lg font-semibold text-red-700">
+              Deleting User...
+            </span>
+          </Box>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialog.open}
+          onClose={() => setDeleteDialog({ open: false, user: null })}>
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete user "
+            {deleteDialog.user?.name || deleteDialog.user?.email}"? This action
+            cannot be undone.
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setDeleteDialog({ open: false, user: null })}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              color="error"
+              variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
     </div>
   );
 }
@@ -474,7 +487,7 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
   const handleSubmit = async () => {
     // Validate form first
     if (!validateForm()) {
-      console.error("Form validation failed:", errors);
+      // console.error("Form validation failed:", errors);
       // Show validation error alert
       Swal.fire({
         icon: "warning",
@@ -487,7 +500,7 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
     }
 
     setIsSubmitting(true);
-    console.log("Submitting form data:", { ...formData, password: "***" }); // Hide password in logs
+    // console.log("Submitting form data:", { ...formData, password: "***" }); // Hide password in logs
 
     try {
       // Prepare the updated user data
@@ -496,7 +509,7 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
         ...formData,
       };
 
-      console.log("Submitting user data:", { ...updatedUser, password: "***" });
+      // console.log("Submitting user data:", { ...updatedUser, password: "***" });
       await onSubmit(updatedUser);
       // Success is handled in the parent component
     } catch (error) {

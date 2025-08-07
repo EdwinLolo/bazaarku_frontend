@@ -57,7 +57,7 @@ function RentalCategoryTab() {
     setLoading(true);
     try {
       const response = await getRentalCategories();
-      console.log("Fetched Categories:", response.data);
+      // console.log("Fetched Categories:", response.data);
       // Ensure all items have an ID
       const categoriesWithIds = (response.data || []).map(
         (category, index) => ({
@@ -77,7 +77,7 @@ function RentalCategoryTab() {
   // Handle banner file upload
   const handleBannerFileChange = (e) => {
     const file = e.target.files[0];
-    console.log("File selected:", file);
+    // console.log("File selected:", file);
 
     if (file) {
       // Check file size (5MB limit)
@@ -111,11 +111,11 @@ function RentalCategoryTab() {
         remove_banner: false, // Don't automatically set remove_banner
       }));
 
-      console.log("File set to form data:", {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      });
+      // console.log("File set to form data:", {
+      //   name: file.name,
+      //   size: file.size,
+      //   type: file.type,
+      // });
     }
   };
 
@@ -289,6 +289,7 @@ function RentalCategoryTab() {
     } finally {
       setAddLoading(false);
       setEditLoading(false);
+      setDeleteLoading(false);
       fetchCategories(); // Refresh categories after submit
     }
   };

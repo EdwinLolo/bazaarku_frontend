@@ -60,7 +60,7 @@ function BannersTab() {
     setLoading(true);
     try {
       const response = await getBanners();
-      console.log("Fetched Banners:", response.data);
+      // console.log("Fetched Banners:", response.data);
       const bannersWithIds = (response.data || []).map((banner, index) => ({
         ...banner,
         id: banner.id || `temp-${index}-${Date.now()}`,
@@ -82,7 +82,7 @@ function BannersTab() {
   // Handle banner image file upload
   const handleImageFileChange = (e) => {
     const file = e.target.files[0];
-    console.log("File selected:", file);
+    // console.log("File selected:", file);
 
     if (file) {
       // Check file size (5MB limit)
@@ -116,11 +116,11 @@ function BannersTab() {
         remove_banner: false,
       }));
 
-      console.log("File set to form data:", {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      });
+      // console.log("File set to form data:", {
+      //   name: file.name,
+      //   size: file.size,
+      //   type: file.type,
+      // });
     }
   };
 
@@ -195,11 +195,11 @@ function BannersTab() {
       const hasBannerFile = formData.banner_file;
       const hasBannerUrl = formData.banner && formData.banner.trim();
 
-      console.log("=== FRONTEND SUBMIT DEBUG ===");
-      console.log("Form data:", formData);
-      console.log("Has banner file:", hasBannerFile);
-      console.log("Has banner URL:", hasBannerUrl);
-      console.log("Is editing:", !!editingBanner);
+      // console.log("=== FRONTEND SUBMIT DEBUG ===");
+      // console.log("Form data:", formData);
+      // console.log("Has banner file:", hasBannerFile);
+      // console.log("Has banner URL:", hasBannerUrl);
+      // console.log("Is editing:", !!editingBanner);
 
       const safeStringTrim = (value) => {
         if (value === null || value === undefined) return "";
@@ -218,17 +218,17 @@ function BannersTab() {
         if (hasBannerFile) {
           // If uploading a new file, backend expects 'file' field name
           formDataToSend.append("banner_image", formData.banner_file);
-          console.log("Added file to FormData:", {
-            name: formData.banner_file,
-          });
+          // console.log("Added file to FormData:", {
+          //   name: formData.banner_file,
+          // });
         } else if (formData.remove_banner) {
           // Only set remove_banner if explicitly removing and no new file
           formDataToSend.append("remove_banner", "true");
-          console.log("Setting remove_banner to true");
+          // console.log("Setting remove_banner to true");
         }
 
-        console.log("=== SENDING UPDATE ===");
-        console.log("Banner ID:", editingBanner.id);
+        // console.log("=== SENDING UPDATE ===");
+        // console.log("Banner ID:", editingBanner.id);
 
         const response = await updateBanner(editingBanner.id, formDataToSend);
 
@@ -255,7 +255,7 @@ function BannersTab() {
           // Backend expects 'file' field name for create operations
           formDataToSend.append("banner_image", formData.banner_file);
 
-          console.log("Creating banner with file upload");
+          // console.log("Creating banner with file upload");
 
           const response = await createBanner(formDataToSend);
 
@@ -273,7 +273,7 @@ function BannersTab() {
             processedData.banner = formData.banner.trim();
           }
 
-          console.log("Creating banner with JSON data:", processedData);
+          // console.log("Creating banner with JSON data:", processedData);
           const response = await createBanner(processedData);
 
           const newBanner = response.data || response;

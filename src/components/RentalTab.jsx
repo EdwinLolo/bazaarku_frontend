@@ -66,7 +66,7 @@ function RentalTab() {
   const fetchCategories = async () => {
     try {
       const response = await getRentalCategories();
-      console.log("Fetched Categories:", response.data);
+      // console.log("Fetched Categories:", response.data);
       const categoriesWithIds = (response.data || []).map(
         (category, index) => ({
           ...category,
@@ -84,7 +84,7 @@ function RentalTab() {
     setLoading(true);
     try {
       const response = await getRentalProducts();
-      console.log("Fetched Rentals:", response.data);
+      // console.log("Fetched Rentals:", response.data);
       const rentalsWithIds = (response.data || []).map((rental, index) => ({
         ...rental,
         id: rental.id || `temp-${index}-${Date.now()}`,
@@ -101,7 +101,7 @@ function RentalTab() {
   // Handle image file upload
   const handleImageFileChange = (e) => {
     const file = e.target.files[0];
-    console.log("File selected:", file);
+    // console.log("File selected:", file);
 
     if (file) {
       // Check file size (5MB limit)
@@ -135,11 +135,11 @@ function RentalTab() {
         remove_banner: false, // Don't automatically set remove_banner
       }));
 
-      console.log("File set to form data:", {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      });
+      // console.log("File set to form data:", {
+      //   name: file.name,
+      //   size: file.size,
+      //   type: file.type,
+      // });
     }
   };
 

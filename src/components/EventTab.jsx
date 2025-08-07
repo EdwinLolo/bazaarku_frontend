@@ -112,7 +112,7 @@ function EventTab() {
     setLoading(true);
     try {
       const mockData = await getEventProduct();
-      console.log("Fetched events:", mockData.data);
+      // console.log("Fetched events:", mockData.data);
       setEvents(mockData.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -414,8 +414,8 @@ function EventTab() {
         );
         const categoryName = selectedCategory ? selectedCategory.name : "";
 
-        console.log("Selected category:", selectedCategory);
-        console.log("Category name:", categoryName);
+        // console.log("Selected category:", selectedCategory);
+        // console.log("Category name:", categoryName);
 
         // Add all required fields that backend expects
         const fieldsToAdd = {
@@ -432,7 +432,7 @@ function EventTab() {
           contact: formData.contact,
         };
 
-        console.log("Fields to add:", fieldsToAdd);
+        // console.log("Fields to add:", fieldsToAdd);
 
         // Add all fields to FormData
         Object.keys(fieldsToAdd).forEach((key) => {
@@ -450,14 +450,14 @@ function EventTab() {
         }
 
         // Debug: Log what we're sending
-        console.log("Sending FormData:");
-        for (let pair of formDataToSend.entries()) {
-          if (pair[1] instanceof File) {
-            console.log(pair[0] + ": [File: " + pair[1].name + "]");
-          } else {
-            console.log(pair[0] + ": " + pair[1]);
-          }
-        }
+        // console.log("Sending FormData:");
+        // for (let pair of formDataToSend.entries()) {
+        //   if (pair[1] instanceof File) {
+        //     console.log(pair[0] + ": [File: " + pair[1].name + "]");
+        //   } else {
+        //     console.log(pair[0] + ": " + pair[1]);
+        //   }
+        // }
 
         if (editingEvent) {
           await updateEvent(editingEvent.id, formDataToSend);
@@ -489,7 +489,7 @@ function EventTab() {
           remove_permit: formData.remove_permit,
         };
 
-        console.log("Sending JSON data:", jsonData);
+        // console.log("Sending JSON data:", jsonData);
 
         if (editingEvent) {
           await updateEvent(editingEvent.id, jsonData);

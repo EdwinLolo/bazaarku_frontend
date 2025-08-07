@@ -44,7 +44,7 @@ function EventBoothTab() {
   const fetchEvents = async () => {
     try {
       const response = await getEventProduct();
-      console.log("Events API response:", response);
+      // console.log("Events API response:", response);
 
       if (response && response.data && Array.isArray(response.data)) {
         setEvents(response.data);
@@ -69,7 +69,7 @@ function EventBoothTab() {
     setLoading(true);
     try {
       const response = await getBooth();
-      console.log("Fetched booth applications:", response.data);
+      // console.log("Fetched booth applications:", response.data);
       setBooths(response.data || []);
     } catch (error) {
       console.error("Error fetching booth applications:", error);
@@ -252,13 +252,13 @@ function EventBoothTab() {
   };
 
   const getEventTitle = (eventId) => {
-    console.log("Getting event title for ID:", eventId);
-    console.log("Available events:", events);
+    // console.log("Getting event title for ID:", eventId);
+    // console.log("Available events:", events);
 
     if (!eventId) return "No Event";
 
     const event = events.find((event) => event.id === eventId);
-    console.log("Found event:", event);
+    // console.log("Found event:", event);
 
     if (!event) return "Unknown Event";
 
@@ -292,14 +292,14 @@ function EventBoothTab() {
       width: 200,
       renderCell: (params) => {
         const eventTitle = getEventTitle(params.value);
-        console.log(
-          "Rendering event for booth:",
-          params.row.id,
-          "Event ID:",
-          params.value,
-          "Title:",
-          eventTitle
-        );
+        // console.log(
+        //   "Rendering event for booth:",
+        //   params.row.id,
+        //   "Event ID:",
+        //   params.value,
+        //   "Title:",
+        //   eventTitle
+        // );
         return <span>{eventTitle}</span>;
       },
     },

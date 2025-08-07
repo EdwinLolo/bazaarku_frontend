@@ -68,7 +68,7 @@ function EventVendorTab() {
     setLoading(true);
     try {
       const response = await getEventVendors();
-      console.log("Fetched vendors:", response.data);
+      // console.log("Fetched vendors:", response.data);
       setVendors(response.data || []);
     } catch (error) {
       console.error("Error fetching vendors:", error);
@@ -81,14 +81,14 @@ function EventVendorTab() {
   const fetchUsers = async () => {
     try {
       const response = await getUserData();
-      console.log("Fetched users:", response);
+      // console.log("Fetched users:", response);
 
       if (Array.isArray(response)) {
         setUsers(response);
       } else if (response && Array.isArray(response.data)) {
         setUsers(response.data);
       } else {
-        console.warn("Unexpected user data format:", response);
+        // console.warn("Unexpected user data format:", response);
         setUsers([]);
       }
     } catch (error) {
@@ -108,10 +108,10 @@ function EventVendorTab() {
 
     try {
       const compressedFile = await imageCompression(file, options);
-      console.log(`Original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
-      console.log(
-        `Compressed: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`
-      );
+      // console.log(`Original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+      // console.log(
+      //   `Compressed: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`
+      // );
       return compressedFile;
     } catch (error) {
       console.error("Error compressing image:", error);
@@ -122,7 +122,7 @@ function EventVendorTab() {
   // Handle banner file upload
   const handleBannerFileChange = async (e) => {
     const file = e.target.files[0];
-    console.log("File selected:", file);
+    // console.log("File selected:", file);
 
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
@@ -147,7 +147,7 @@ function EventVendorTab() {
         });
 
         const compressedFile = await compressImage(file);
-        console.log("Compressed file:", compressedFile);
+        // console.log("Compressed file:", compressedFile);
 
         setFormData((prev) => ({
           ...prev,
@@ -305,63 +305,63 @@ function EventVendorTab() {
         if (hasBannerFile) {
           // If uploading a new file, remove the old banner
           fieldsToAdd.remove_banner = "true";
-          console.log(
-            "Setting remove_banner to true because new file is being uploaded"
-          );
+          // console.log(
+          //   "Setting remove_banner to true because new file is being uploaded"
+          // );
         } else if (formData.remove_banner) {
           // If explicitly removing banner
           fieldsToAdd.remove_banner = "true";
-          console.log(
-            "Setting remove_banner to true because user explicitly removed banner"
-          );
+          // console.log(
+          //   "Setting remove_banner to true because user explicitly removed banner"
+          // );
         } else if (hasBannerUrl) {
           // If updating with URL
           fieldsToAdd.banner = safeStringTrim(formData.banner);
           fieldsToAdd.remove_banner = "false";
-          console.log("Setting banner URL and remove_banner to false");
+          // console.log("Setting banner URL and remove_banner to false");
         } else {
           // Keep existing banner
           fieldsToAdd.remove_banner = "false";
-          console.log("Keeping existing banner, remove_banner set to false");
+          // console.log("Keeping existing banner, remove_banner set to false");
         }
 
-        console.log("Banner logic:", {
-          hasBannerFile,
-          hasBannerUrl,
-          formDataRemoveBanner: formData.remove_banner,
-          finalRemoveBanner: fieldsToAdd.remove_banner,
-          existingBanner: editingVendor.banner,
-        });
+        // console.log("Banner logic:", {
+        //   hasBannerFile,
+        //   hasBannerUrl,
+        //   formDataRemoveBanner: formData.remove_banner,
+        //   finalRemoveBanner: fieldsToAdd.remove_banner,
+        //   existingBanner: editingVendor.banner,
+        // });
 
         // Append all fields to FormData
         Object.entries(fieldsToAdd).forEach(([key, value]) => {
           if (value !== null && value !== undefined && value !== "") {
             formDataToSend.append(key, value);
-            console.log(`Added to FormData: ${key} = ${value}`);
+            // console.log(`Added to FormData: ${key} = ${value}`);
           }
         });
 
         // Add the file if present
         if (hasBannerFile) {
           formDataToSend.append("banner_image", formData.banner_file);
-          console.log("Added file to FormData:", {
-            fieldName: "banner_image",
-            name: formData.banner_file.name,
-            size: formData.banner_file.size,
-            type: formData.banner_file.type,
-          });
+          // console.log("Added file to FormData:", {
+          //   fieldName: "banner_image",
+          //   name: formData.banner_file.name,
+          //   size: formData.banner_file.size,
+          //   type: formData.banner_file.type,
+          // });
         }
 
-        console.log("=== SENDING UPDATE ===");
-        console.log("Vendor ID:", editingVendor.id);
-        console.log("FormData entries:");
-        for (let [key, value] of formDataToSend.entries()) {
-          if (value instanceof File) {
-            console.log(`${key}: File(${value.name})`);
-          } else {
-            console.log(`${key}: ${value}`);
-          }
-        }
+        // console.log("=== SENDING UPDATE ===");
+        // console.log("Vendor ID:", editingVendor.id);
+        // console.log("FormData entries:");
+        // for (let [key, value] of formDataToSend.entries()) {
+        //   if (value instanceof File) {
+        //     console.log(`${key}: File(${value.name})`);
+        //   } else {
+        //     console.log(`${key}: ${value}`);
+        //   }
+        // }
 
         await updateEventVendor(editingVendor.id, formDataToSend);
       } else {

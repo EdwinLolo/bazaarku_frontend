@@ -37,6 +37,9 @@ function EventBoothTab() {
     desc: "",
   });
   const [events, setEvents] = useState([]);
+  const [addLoading, setAddLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchEvents = async () => {
     try {
@@ -111,6 +114,7 @@ function EventBoothTab() {
 
     if (result.isConfirmed) {
       try {
+        setDeleteLoading(true);
         await deleteBooth(id);
         setBooths((prev) => prev.filter((booth) => booth.id !== id));
         Swal.fire("Deleted!", "Booth application has been deleted.", "success");
@@ -121,6 +125,8 @@ function EventBoothTab() {
           title: "Error!",
           text: "Failed to delete booth application.",
         });
+      } finally {
+        setDeleteLoading(false);
       }
     }
   };
@@ -193,18 +199,15 @@ function EventBoothTab() {
       // Add status - use the current status from editingBooth or default to PENDING
       if (editingBooth) {
         processedData.is_acc = editingBooth.is_acc || "PENDING";
+        setEditLoading(true);
       } else {
-        processedData.is_acc = "PENDING"; // New applications always start as PENDING
+        processedData.is_acc = "PENDING";
+        setAddLoading(true);
       }
-
-      console.log("Submitting booth application:", processedData);
 
       if (editingBooth) {
         // Update existing booth application
         const response = await updateBooth(editingBooth.id, processedData);
-        console.log("Update response:", response);
-
-        // Update local state
         setBooths((prev) =>
           prev.map((booth) =>
             booth.id === editingBooth.id
@@ -212,7 +215,6 @@ function EventBoothTab() {
               : booth
           )
         );
-
         Swal.fire(
           "Updated!",
           "Booth application updated successfully.",
@@ -221,15 +223,11 @@ function EventBoothTab() {
       } else {
         // Create new booth application
         const response = await createBooth(processedData);
-        console.log("Create response:", response);
-
-        // Add to local state
         const newBooth = {
           ...processedData,
           id: response.id || response.data?.id || Date.now(),
         };
         setBooths((prev) => [...prev, newBooth]);
-
         Swal.fire(
           "Added!",
           "Booth application submitted successfully.",
@@ -246,6 +244,10 @@ function EventBoothTab() {
         text: error.message || "Failed to save booth application.",
         target: "#event-booth-form-dialog",
       });
+    } finally {
+      setAddLoading(false);
+      setEditLoading(false);
+      fetchBooths(); // Refresh booth list after submit
     }
   };
 
@@ -586,10 +588,64 @@ function EventBoothTab() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {editingBooth ? "Update Application" : "Submit Application"}
-          </Button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={addLoading || editLoading || deleteLoading}
+            className={`
+              flex items-center gap-2 px-6 py-2 rounded-md font-semibold
+              transition-colors
+              ${addLoading ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+              ${
+                editLoading
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : ""
+              }
+              ${deleteLoading ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+              ${
+                !addLoading && !editLoading && !deleteLoading
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : ""
+              }
+              disabled:opacity-60 disabled:cursor-not-allowed
+            `}>
+            {(addLoading || editLoading || deleteLoading) && (
+              <span
+                className={`
+                  animate-spin inline-block w-4 h-4 border-2 rounded-full
+                  ${addLoading ? "border-white border-t-green-200" : ""}
+                  ${editLoading ? "border-white border-t-yellow-200" : ""}
+                  ${deleteLoading ? "border-white border-t-red-200" : ""}
+                `}
+                style={{ borderRightColor: "transparent" }}
+              />
+            )}
+            {addLoading
+              ? "Adding..."
+              : editLoading
+              ? "Updating..."
+              : deleteLoading
+              ? "Deleting..."
+              : editingBooth
+              ? "Update Application"
+              : "Submit Application"}
+          </button>
         </DialogActions>
+      </Dialog>
+
+      {/* Delete Loading Dialog */}
+      <Dialog
+        open={deleteLoading}
+        PaperProps={{ className: "shadow-none bg-transparent" }}>
+        <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
+          <span
+            className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
+            style={{ borderRightColor: "transparent" }}
+          />
+          <span className="text-lg font-semibold text-red-700">
+            Deleting booth application...
+          </span>
+        </Box>
       </Dialog>
     </div>
   );

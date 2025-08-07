@@ -45,6 +45,9 @@ function RentalCategoryTab() {
     banner_file: null,
     remove_banner: false,
   });
+  const [addLoading, setAddLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -150,6 +153,7 @@ function RentalCategoryTab() {
     });
     if (result.isConfirmed) {
       try {
+        setDeleteLoading(true);
         await deleteRentalCategory(id);
         setCategories((prev) => prev.filter((cat) => cat.id !== id));
         Swal.fire("Deleted!", "Category has been deleted.", "success");
@@ -160,6 +164,8 @@ function RentalCategoryTab() {
           title: "Error!",
           text: "Failed to delete category.",
         });
+      } finally {
+        setDeleteLoading(false);
       }
     }
   };
@@ -180,77 +186,37 @@ function RentalCategoryTab() {
       const hasBannerFile = formData.banner_file;
       const hasBannerUrl = formData.banner && formData.banner.trim();
 
-      console.log("=== FRONTEND SUBMIT DEBUG ===");
-      console.log("Form data:", formData);
-      console.log("Has banner file:", hasBannerFile);
-      console.log("Has banner URL:", hasBannerUrl);
-      console.log("Is editing:", !!editingCategory);
-      console.log("Remove banner:", formData.remove_banner);
-
-      // Helper function to safely convert to string and trim
       const safeStringTrim = (value) => {
         if (value === null || value === undefined) return "";
         return String(value).trim();
       };
 
       if (editingCategory) {
+        setEditLoading(true);
         // For updates, always use FormData to ensure compatibility with multer
         const formDataToSend = new FormData();
-
         const fieldsToAdd = {
           name: safeStringTrim(formData.name),
         };
-
-        // Fixed banner logic
         if (hasBannerFile) {
           // If uploading a new file, don't send remove_banner
-          // The backend will handle replacing the old banner
-          console.log("Uploading new file - not setting remove_banner");
         } else if (formData.remove_banner && !hasBannerFile) {
-          // Only set remove_banner if explicitly removing and no new file
           fieldsToAdd.remove_banner = "true";
-          console.log("Setting remove_banner to true");
         } else if (!hasBannerFile && hasBannerUrl && !formData.remove_banner) {
-          // Updating with URL only
           fieldsToAdd.banner = safeStringTrim(formData.banner);
-          console.log("Setting banner URL:", fieldsToAdd.banner);
         }
-
-        // Append all fields to FormData
         Object.entries(fieldsToAdd).forEach(([key, value]) => {
           if (value !== null && value !== undefined && value !== "") {
             formDataToSend.append(key, value);
-            console.log(`Added to FormData: ${key} = ${value}`);
           }
         });
-
-        // Add the file if present
         if (hasBannerFile) {
           formDataToSend.append("banner_image", formData.banner_file);
-          console.log("Added file to FormData:", {
-            name: formData.banner_file.name,
-            size: formData.banner_file.size,
-            type: formData.banner_file.type,
-          });
         }
-
-        console.log("=== SENDING UPDATE ===");
-        console.log("Category ID:", editingCategory.id);
-        console.log("FormData entries:");
-        for (let [key, value] of formDataToSend.entries()) {
-          if (value instanceof File) {
-            console.log(`${key}: File(${value.name})`);
-          } else {
-            console.log(`${key}: ${value}`);
-          }
-        }
-
         const response = await updateRentalCategory(
           editingCategory.id,
           formDataToSend
         );
-
-        // Update local state
         setCategories((prev) =>
           prev.map((cat) =>
             cat.id === editingCategory.id
@@ -258,29 +224,23 @@ function RentalCategoryTab() {
               : cat
           )
         );
-
         Swal.fire("Updated!", "Category updated successfully.", "success");
       } else {
+        setAddLoading(true);
         // Create new category
         if (hasBannerFile) {
           // Use FormData for file uploads
           const formDataToSend = new FormData();
-
           const fieldsToAdd = {
             name: safeStringTrim(formData.name),
           };
-
           Object.entries(fieldsToAdd).forEach(([key, value]) => {
             if (value !== null && value !== undefined && value !== "") {
               formDataToSend.append(key, value);
             }
           });
-
           formDataToSend.append("banner_image", formData.banner_file);
-
-          console.log("Creating category with file upload");
           const response = await createRentalCategory(formDataToSend);
-
           let newCategory;
           if (response.data && response.data.id) {
             newCategory = response.data;
@@ -293,22 +253,17 @@ function RentalCategoryTab() {
           } else {
             newCategory = { ...fieldsToAdd, id: Date.now() };
           }
-
           setCategories((prev) => [...prev, newCategory]);
         } else {
           // Use JSON for URL-only creates
           const processedData = {
             name: formData.name.trim(),
           };
-
           // Only add banner if it's provided and not empty
           if (hasBannerUrl) {
             processedData.banner = formData.banner.trim();
           }
-
-          console.log("Creating category with JSON data:", processedData);
           const response = await createRentalCategory(processedData);
-
           let newCategory;
           if (response.data && response.data.id) {
             newCategory = response.data;
@@ -317,10 +272,8 @@ function RentalCategoryTab() {
           } else {
             newCategory = { ...processedData, id: Date.now() };
           }
-
           setCategories((prev) => [...prev, newCategory]);
         }
-
         Swal.fire("Added!", "Category added successfully.", "success");
       }
 
@@ -333,6 +286,10 @@ function RentalCategoryTab() {
         text: error.message || "Failed to save category.",
         target: "#rental-category-form-dialog",
       });
+    } finally {
+      setAddLoading(false);
+      setEditLoading(false);
+      fetchCategories(); // Refresh categories after submit
     }
   };
 
@@ -624,10 +581,64 @@ function RentalCategoryTab() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {editingCategory ? "Update" : "Add"}
-          </Button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={addLoading || editLoading || deleteLoading}
+            className={`
+              flex items-center gap-2 px-6 py-2 rounded-md font-semibold
+              transition-colors
+              ${addLoading ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+              ${
+                editLoading
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : ""
+              }
+              ${deleteLoading ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+              ${
+                !addLoading && !editLoading && !deleteLoading
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : ""
+              }
+              disabled:opacity-60 disabled:cursor-not-allowed
+            `}>
+            {(addLoading || editLoading || deleteLoading) && (
+              <span
+                className={`
+                  animate-spin inline-block w-4 h-4 border-2 rounded-full
+                  ${addLoading ? "border-white border-t-green-200" : ""}
+                  ${editLoading ? "border-white border-t-yellow-200" : ""}
+                  ${deleteLoading ? "border-white border-t-red-200" : ""}
+                `}
+                style={{ borderRightColor: "transparent" }}
+              />
+            )}
+            {addLoading
+              ? "Adding..."
+              : editLoading
+              ? "Updating..."
+              : deleteLoading
+              ? "Deleting..."
+              : editingCategory
+              ? "Update"
+              : "Add"}
+          </button>
         </DialogActions>
+      </Dialog>
+
+      {/* Delete Loading Dialog */}
+      <Dialog
+        open={deleteLoading}
+        PaperProps={{ className: "shadow-none bg-transparent" }}>
+        <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
+          <span
+            className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
+            style={{ borderRightColor: "transparent" }}
+          />
+          <span className="text-lg font-semibold text-red-700">
+            Deleting category...
+          </span>
+        </Box>
       </Dialog>
 
       {/* Banner Preview Dialog */}

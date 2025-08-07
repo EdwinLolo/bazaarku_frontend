@@ -55,6 +55,9 @@ function EventVendorTab() {
     banner_file: null,
     remove_banner: false,
   });
+  const [addLoading, setAddLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchVendors();
@@ -211,6 +214,7 @@ function EventVendorTab() {
 
     if (result.isConfirmed) {
       try {
+        setDeleteLoading(true);
         await deleteEventVendor(id);
         setVendors((prev) => prev.filter((vendor) => vendor.id !== id));
         Swal.fire("Deleted!", "Vendor has been deleted.", "success");
@@ -221,6 +225,8 @@ function EventVendorTab() {
           title: "Error!",
           text: "Failed to delete vendor.",
         });
+      } finally {
+        setDeleteLoading(false);
       }
     }
   };
@@ -250,13 +256,6 @@ function EventVendorTab() {
       const hasBannerFile = formData.banner_file;
       const hasBannerUrl = formData.banner && formData.banner.trim();
 
-      console.log("=== FRONTEND SUBMIT DEBUG ===");
-      console.log("Form data:", formData);
-      console.log("Has banner file:", hasBannerFile);
-      console.log("Has banner URL:", hasBannerUrl);
-      console.log("Is editing:", !!editingVendor);
-      console.log("Remove banner:", formData.remove_banner);
-
       // Banner validation logic
       if (!editingVendor && !hasBannerFile && !hasBannerUrl) {
         Swal.fire(
@@ -282,6 +281,7 @@ function EventVendorTab() {
       }
 
       if (editingVendor) {
+        setEditLoading(true);
         // For updates, always use FormData to ensure compatibility with multer
         const formDataToSend = new FormData();
 
@@ -365,6 +365,7 @@ function EventVendorTab() {
 
         await updateEventVendor(editingVendor.id, formDataToSend);
       } else {
+        setAddLoading(true);
         // For creating new vendors
         if (hasBannerFile) {
           // Use FormData for file uploads
@@ -425,6 +426,9 @@ function EventVendorTab() {
         text: error.message || "Failed to save vendor.",
         target: "#event-vendor-form-dialog",
       });
+    } finally {
+      setAddLoading(false);
+      setEditLoading(false);
     }
   };
 
@@ -827,10 +831,64 @@ function EventVendorTab() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {editingVendor ? "Update" : "Add"}
-          </Button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={addLoading || editLoading || deleteLoading}
+            className={`
+              flex items-center gap-2 px-6 py-2 rounded-md font-semibold
+              transition-colors
+              ${addLoading ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+              ${
+                editLoading
+                  ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  : ""
+              }
+              ${deleteLoading ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+              ${
+                !addLoading && !editLoading && !deleteLoading
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : ""
+              }
+              disabled:opacity-60 disabled:cursor-not-allowed
+            `}>
+            {(addLoading || editLoading || deleteLoading) && (
+              <span
+                className={`
+                  animate-spin inline-block w-4 h-4 border-2 rounded-full
+                  ${addLoading ? "border-white border-t-green-200" : ""}
+                  ${editLoading ? "border-white border-t-yellow-200" : ""}
+                  ${deleteLoading ? "border-white border-t-red-200" : ""}
+                `}
+                style={{ borderRightColor: "transparent" }}
+              />
+            )}
+            {addLoading
+              ? "Adding..."
+              : editLoading
+              ? "Updating..."
+              : deleteLoading
+              ? "Deleting..."
+              : editingVendor
+              ? "Update Vendor"
+              : "Add Vendor"}
+          </button>
         </DialogActions>
+      </Dialog>
+
+      {/* Delete Loading Dialog */}
+      <Dialog
+        open={deleteLoading}
+        PaperProps={{ className: "shadow-none bg-transparent" }}>
+        <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
+          <span
+            className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
+            style={{ borderRightColor: "transparent" }}
+          />
+          <span className="text-lg font-semibold text-red-700">
+            Deleting vendor...
+          </span>
+        </Box>
       </Dialog>
 
       {/* Banner Preview Dialog */}

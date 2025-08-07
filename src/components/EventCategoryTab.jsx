@@ -9,6 +9,7 @@ import {
   DialogActions,
   TextField,
   IconButton,
+  Box,
   Chip,
 } from "@mui/material";
 import { Edit, Delete, Add } from "@mui/icons-material";
@@ -24,6 +25,9 @@ import {
 function EventCategoryTab() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [formData, setFormData] = useState({
@@ -74,7 +78,10 @@ function EventCategoryTab() {
 
     if (result.isConfirmed) {
       try {
+        setDeleteLoading(true);
         await deleteEventCategory(id);
+        setDeleteLoading(false);
+
         setCategories((prev) => prev.filter((cat) => cat.id !== id));
         Swal.fire("Deleted!", "Category has been deleted.", "success");
       } catch (error) {
@@ -88,6 +95,8 @@ function EventCategoryTab() {
   };
 
   const handleSubmit = async () => {
+    setAddLoading(true);
+    setEditLoading(true);
     try {
       if (editingCategory) {
         // Update existing
@@ -106,6 +115,9 @@ function EventCategoryTab() {
         Swal.fire("Added!", "Category added successfully.", "success");
       }
       setDialogOpen(false);
+      setAddLoading(false);
+      setEditLoading(false);
+      fetchCategories(); // Refresh data
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -199,10 +211,59 @@ function EventCategoryTab() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {editingCategory ? "Update" : "Add"}
-          </Button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={addLoading || editLoading || deleteLoading}
+            className={`
+      flex items-center gap-2 px-6 py-2 rounded-md font-semibold
+      transition-colors
+      ${addLoading ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+      ${editLoading ? "bg-yellow-500 hover:bg-yellow-600 text-white" : ""}
+      ${deleteLoading ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+      ${
+        !addLoading && !editLoading && !deleteLoading
+          ? "bg-blue-600 hover:bg-blue-700 text-white"
+          : ""
+      }
+      disabled:opacity-60 disabled:cursor-not-allowed
+    `}>
+            {(addLoading || editLoading || deleteLoading) && (
+              <span
+                className={`
+          animate-spin inline-block w-4 h-4 border-2 rounded-full
+          ${addLoading ? "border-white border-t-green-200" : ""}
+          ${editLoading ? "border-white border-t-yellow-200" : ""}
+          ${deleteLoading ? "border-white border-t-red-200" : ""}
+        `}
+                style={{ borderRightColor: "transparent" }}
+              />
+            )}
+            {addLoading
+              ? "Adding..."
+              : editLoading
+              ? "Updating..."
+              : deleteLoading
+              ? "Deleting..."
+              : editingCategory
+              ? "Update Category"
+              : "Add Banner"}
+          </button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={deleteLoading}
+        PaperProps={{ className: "shadow-none bg-transparent" }}>
+        <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
+          <span
+            className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
+            style={{ borderRightColor: "transparent" }}
+          />
+          <span className="text-lg font-semibold text-red-700">
+            Deleting Event Category...
+          </span>
+        </Box>
       </Dialog>
     </div>
   );

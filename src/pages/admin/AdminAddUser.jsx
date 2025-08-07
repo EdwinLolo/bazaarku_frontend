@@ -26,6 +26,7 @@ import Swal from "sweetalert2";
 export default function AdminAddUser() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState(null);
   const [editDialog, setEditDialog] = useState({ open: false, user: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
@@ -192,8 +193,9 @@ export default function AdminAddUser() {
       });
 
       if (result.isConfirmed) {
+        setDeleteLoading(true);
         await deleteUser(user.id);
-
+        setDeleteLoading(false);
         // Remove the row from local state
         setRows((prevRows) => prevRows.filter((row) => row.id !== user.id));
 
@@ -348,6 +350,20 @@ export default function AdminAddUser() {
         onClose={() => setEditDialog({ open: false, user: null })}
         onSubmit={handleEditSubmit}
       />
+
+      <Dialog
+        open={deleteLoading}
+        PaperProps={{ className: "shadow-none bg-transparent" }}>
+        <Box className="flex items-center justify-center min-h-[200px] min-w-[280px] bg-white rounded-lg shadow-lg p-8 gap-4 flex-col">
+          <span
+            className="inline-block w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"
+            style={{ borderRightColor: "transparent" }}
+          />
+          <span className="text-lg font-semibold text-red-700">
+            Deleting User...
+          </span>
+        </Box>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -511,7 +527,12 @@ function EditUserDialog({ open, user, schools, onClose, onSubmit }) {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth id="user-form-dialog">
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      id="user-form-dialog">
       <DialogTitle>{user?.id ? "Edit User" : "Add New User"}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>

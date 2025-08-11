@@ -10,7 +10,7 @@ function EventsPage() {
   // State for Events
   const [events, setEvents] = useState([]);
   const [eventPage, setEventPage] = useState(1);
-  const [eventLimit, setEventLimit] = useState(6);
+  const [eventLimit, setEventLimit] = useState(9);
   const [totalEventPages, setTotalEventPages] = useState(1);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
@@ -146,11 +146,10 @@ function EventsPage() {
         <button
           onClick={() => setPage((prevPage) => Math.max(1, prevPage - 1))}
           disabled={currentPage === 1}
-          className={`py-2 px-4 rounded-xl text-white font-semibold transition-colors duration-300 ${
-            currentPage === 1
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary hover:bg-primary-dark"
-          }`}>
+          className={`py-2 px-4 rounded-xl text-white font-semibold transition-colors duration-300 ${currentPage === 1
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-primary hover:bg-primary-dark"
+            }`}>
           Previous
         </button>
         <span className="text-lg font-semibold text-gray-700">
@@ -161,11 +160,10 @@ function EventsPage() {
             setPage((prevPage) => Math.min(totalPages, prevPage + 1))
           }
           disabled={currentPage === totalPages}
-          className={`py-2 px-4 rounded-xl text-white font-semibold transition-colors duration-300 ${
-            currentPage === totalPages
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-primary hover:bg-primary-dark"
-          }`}>
+          className={`py-2 px-4 rounded-xl text-white font-semibold transition-colors duration-300 ${currentPage === totalPages
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-primary hover:bg-primary-dark"
+            }`}>
           Next
         </button>
       </div>
@@ -191,11 +189,11 @@ function EventsPage() {
       </div>
 
       <section className="mb-16 px-4 md:px-12">
-        <div className="flex justify-between items-center mb-4 flex-col md:flex-row space-y-4 md:space-y-0">
+        <div className="flex justify-between md:items-center mb-4 flex-col md:flex-row space-y-4 md:space-y-0">
           <h1 className="text-4xl text-primary font-bold mb-4 md:mb-0">
             Nearest Event
           </h1>
-          <div className="flex space-x-4">
+          <div className="flex flex-col md:flex-row gap-4">
             {/* Area Filter Dropdown */}
             <div className="relative">
               <button
@@ -209,9 +207,8 @@ function EventsPage() {
                   </span>
                 </div>
                 <ChevronDown
-                  className={`h-4 w-4 ml-2 transition-transform duration-200 ${
-                    isAreaDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 ml-2 transition-transform duration-200 ${isAreaDropdownOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
               {isAreaDropdownOpen && (
@@ -256,9 +253,8 @@ function EventsPage() {
                   </span>
                 </div>
                 <ChevronDown
-                  className={`h-4 w-4 ml-2 transition-transform duration-200 ${
-                    isCategoryDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`h-4 w-4 ml-2 transition-transform duration-200 ${isCategoryDropdownOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
               {isCategoryDropdownOpen && (
@@ -300,13 +296,8 @@ function EventsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {events.map((event) => (
               <EventCard
-                id={event.id}
                 key={event.id}
-                imageUrl={event.banner}
-                name={event.name}
-                location={event.location}
-                start_date={event.start_date}
-                end_date={event.end_date}
+                event={event}
               />
             ))}
           </div>
@@ -314,31 +305,35 @@ function EventsPage() {
           <p className="text-gray-500 italic">No events found...</p>
         )}
         {/* Event Pagination */}
-        <PaginationControls
-          currentPage={eventPage}
-          totalPages={totalEventPages}
-          setPage={setEventPage}
-        />
+        <div className="flex justify-center mt-8">
+          <PaginationControls
+            currentPage={eventPage}
+            totalPages={totalEventPages}
+            setPage={setEventPage}
+          />
+        </div>
       </section>
 
       <section className="mb-16 px-4 md:px-12">
         <h1 className="text-4xl text-primary font-bold mb-4">Vendors</h1>
         {loadingVendors ? (
-          <Loading message="Loading vendors..." />
+          <div className="flex flex-col items-center justify-center min-h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-800"></div>
+            <p className="mt-4 text-lg font-bold text-primary">
+              Loading Vendors...
+            </p>
+          </div>
         ) : vendors.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
             {vendors.map((vendor) => (
               <VendorCard
                 key={vendor.id}
-                imageUrl={vendor.banner}
-                name={vendor.name}
-                location={vendor.location}
-                id={vendor.id}
+                vendor={vendor}
               />
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 italic">No vendor found...</p>
+          <p className="text-gray-500 italic">No vendors found...</p>
         )}
         {/* Vendor Pagination */}
         <PaginationControls

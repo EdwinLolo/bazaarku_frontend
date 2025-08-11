@@ -83,12 +83,7 @@ function RentalsPage() {
                                 rental.rental_products.map((product) => (
                                     <RentalProductCard
                                         key={product.id}
-                                        imageUrl={product.banner || TempImage}
-                                        title={product.name}
-                                        price={product.price}
-                                        location={product.location}
-                                        id={product.id}
-                                        isReady={product.is_ready}
+                                        product={product}
                                         onClick={() => {
                                             setSelectedProduct(product);
                                             setShowPopup(true);

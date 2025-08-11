@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 
-const RentalCard = ({ imageUrl, title, className = '', id }) => {
+const RentalCard = ({ rental, className = '' }) => {
+    const { id, banner, name } = rental;
+
     return (
         <Link
             key={id}
@@ -9,15 +11,15 @@ const RentalCard = ({ imageUrl, title, className = '', id }) => {
         >
             <div className="relative w-full h-full">
                 <img
-                    src={imageUrl}
-                    alt={title}
+                    src={banner}
+                    alt={name}
                     className="w-full h-full object-cover"
                 />
             </div>
 
             <div className="absolute bottom-0 inset-x-0 h-[66.67%] bg-gradient-to-t from-gray-900/90 to-transparent flex flex-col justify-end p-6 transition-all duration-500 ease-in-out group-hover:from-blue-900/90">
                 <h3 className="text-white text-3xl font-extrabold mb-2 drop-shadow-lg transition-all duration-500 ease-in-out group-hover:-translate-y-2 group-hover:text-sky-300">
-                    {title}
+                    {name}
                 </h3>
             </div>
         </Link>

@@ -21,7 +21,7 @@ function Carousel({ slides }) {
 
     return (
         <div className="w-full" aria-label="Image carousel">
-            <div className="relative w-full overflow-hidden aspect-[15/5]">
+            <div className="relative w-full overflow-hidden">
                 <Swiper
                     onSwiper={(swiper) => (swiperRef.current = swiper)}
                     onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
@@ -57,7 +57,7 @@ function Carousel({ slides }) {
                                 className="block w-full h-full"
                                 aria-label={slide.alt}
                             >
-                                <div className="w-full h-full flex justify-center items-center overflow-hidden">
+                                <div className="w-full h-full flex justify-center items-center overflow-hidden aspect-[16/9]">
                                     <img
                                         src={slide.url}
                                         alt={slide.alt}

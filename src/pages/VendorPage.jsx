@@ -127,10 +127,9 @@ function VendorPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
           style={{
-            backgroundImage: `url(${
-              vendor.banner ||
+            backgroundImage: `url(${vendor.banner ||
               "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
-            })`,
+              })`,
             filter: "brightness(0.8)",
           }}
         />
@@ -185,29 +184,26 @@ function VendorPage() {
           <div className="border-b border-gray-200">
             <div className="flex overflow-x-auto">
               <button
-                className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${
-                  activeTab === "about"
+                className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${activeTab === "about"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
                 onClick={() => setActiveTab("about")}>
                 About Us
               </button>
               <button
-                className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${
-                  activeTab === "events"
+                className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${activeTab === "events"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
                 onClick={() => setActiveTab("events")}>
                 Events
               </button>
               <button
-                className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${
-                  activeTab === "contact"
+                className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${activeTab === "contact"
                     ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
                 onClick={() => setActiveTab("contact")}>
                 Contact
               </button>
@@ -307,12 +303,7 @@ function VendorPage() {
                     {vendor.event.map((event) => (
                       <EventCard
                         key={event.id}
-                        id={event.id}
-                        imageUrl={event.banner}
-                        name={event.name}
-                        location={event.location}
-                        start_date={event.start_date}
-                        end_date={event.end_date}
+                        event={event}
                       />
                     ))}
                   </div>

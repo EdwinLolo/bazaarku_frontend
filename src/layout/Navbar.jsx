@@ -102,33 +102,31 @@ const Navbar = () => {
                   className="object-contain w-full h-20"
                 />
               </Link>
-
-              {/* Desktop Nav Links */}
-              <nav className="items-center hidden space-x-6 md:flex">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    to={link.to}
-                    className="text-lg font-bold transition-colors duration-300 hover:text-gray-300">
-                    {link.name}
-                  </Link>
-                ))}
-              </nav>
             </div>
             {/* End Left Section */}
 
+            {/* Desktop Nav Links */}
+            <nav className="items-center hidden space-x-12 md:flex">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.to}
+                  className="text-lg font-bold transition-colors duration-300 hover:text-gray-300">
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
             {/* Middle Section: Search Bar (Visible on larger screens) */}
-            <div className="justify-center flex-1 hidden px-8 lg:flex">
+            {/* <div className="justify-center flex-1 hidden px-8 lg:flex">
               <div className="relative w-full max-w-lg">
                 <input
                   type="text"
                   placeholder="Search anything..."
                   className="w-full py-2.5 pl-5 pr-12 text-gray-800 transition-all duration-300 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
-                {/* Using Lucide Search icon */}
                 <Search className="absolute w-6 h-6 text-gray-500 -translate-y-1/2 top-1/2 right-4" />
               </div>
-            </div>
+            </div> */}
             {/* End Middle Section */}
 
             {/* Right Section: Login Button and Mobile Menu */}
@@ -143,9 +141,8 @@ const Navbar = () => {
                       {user?.first_name || "Account"}
                     </span>
                     <ChevronDown
-                      className={`w-5 h-5 transition-transform duration-200 ${
-                        isDropdownOpen ? "rotate-180" : ""
-                      }`}
+                      className={`w-5 h-5 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""
+                        }`}
                       strokeWidth={3}
                     />
                   </button>
@@ -183,13 +180,11 @@ const Navbar = () => {
                         <button
                           onClick={handleLogout}
                           disabled={loading}
-                          className={`w-full text-center px-4 py-2 text-sm font-semibold ${
-                            loading
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-red-600 hover:bg-red-700"
-                          } rounded-md transition ${
-                            loading ? "opacity-75" : "opacity-100"
-                          }`}>
+                          className={`w-full text-center px-4 py-2 text-sm font-semibold ${loading
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-red-600 hover:bg-red-700"
+                            } rounded-md transition ${loading ? "opacity-75" : "opacity-100"
+                            }`}>
                           {loading ? "Logging out..." : "Logout"}
                         </button>
                       </div>
@@ -240,7 +235,7 @@ const Navbar = () => {
                       setShowLogin(true);
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full px-4 py-2 font-bold transition-all duration-300 bg-white rounded-full text-primary hover:bg-gray-200">
+                    className="block ml-3 w-3/5 px-4 py-2 font-bold transition-all duration-300 bg-white rounded-lg text-primary hover:bg-gray-200">
                     Login
                   </button>
                 </div>

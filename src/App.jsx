@@ -4,7 +4,8 @@ import {
     RouterProvider,
     Outlet,
     useLocation,
-    ScrollRestoration
+    ScrollRestoration,
+    Link
 } from "react-router-dom";
 
 // Layouts

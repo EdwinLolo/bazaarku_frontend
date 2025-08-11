@@ -1,6 +1,8 @@
 import { MapPin, Clock, CheckCircle } from "lucide-react";
 
-const RentalProductCard = ({ imageUrl, title, price, location, className = '', isReady, onClick }) => {
+const RentalProductCard = ({ product, className = '', onClick }) => {
+    const { id, banner, name, price, location, is_ready } = product;
+
     // Corrected: Declare the variable outside the JSX return statement
     const formattedPrice = typeof price === 'number'
         ? price.toLocaleString('id-ID', {
@@ -21,19 +23,19 @@ const RentalProductCard = ({ imageUrl, title, price, location, className = '', i
             <div className="absolute top-4 left-4 z-10">
                 <span
                     className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm
-                        ${isReady
+                        ${is_ready
                             ? 'bg-green-500/10 text-green-800 border border-green-200'
                             : 'bg-amber-500/10 text-amber-800 border border-amber-200'}`}
                 >
-                    {isReady ? <CheckCircle size={14} className="text-green-600" /> : <Clock size={14} className="text-amber-600" />}
-                    <span className="mt-0.5">{isReady ? "Available Now" : "Reserved"}</span>
+                    {is_ready ? <CheckCircle size={14} className="text-green-600" /> : <Clock size={14} className="text-amber-600" />}
+                    <span className="mt-0.5">{is_ready ? "Available Now" : "Reserved"}</span>
                 </span>
             </div>
 
             <div className="relative h-56 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                 <img
-                    src={imageUrl}
-                    alt={title}
+                    src={banner}
+                    alt={name}
                     className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -41,7 +43,7 @@ const RentalProductCard = ({ imageUrl, title, price, location, className = '', i
 
             <div className="p-4 pt-3.5 flex flex-col flex-grow gap-3">
                 <h3 className="text-lg font-semibold text-gray-900 leading-tight line-clamp-2">
-                    {title}
+                    {name}
                 </h3>
 
                 <div className="">

@@ -25,6 +25,12 @@ export const getEventData = async () => {
   });
 };
 
+export const getEventData2 = async () => {
+  return apiCall("/event-data", {
+    method: "GET",
+  });
+};
+
 export const createEventCategory = async (categoryData) => {
   return apiCall("/event-categories", {
     method: "POST",
@@ -552,6 +558,59 @@ export const updateBanner = async (id, data) => {
 
 export const deleteBanner = async (id) => {
   return apiCall(`/banners/${id}`, {
+    method: "DELETE",
+  });
+};
+
+export const getEventRatings = async () => {
+  return apiCall("/rating", {
+    method: "GET",
+  });
+};
+
+export const createEventRating = async (data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+  const isFormData = data instanceof FormData;
+
+  const options = {
+    method: "POST",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  };
+  const response = await fetch(`${baseURL}/rating`, options);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to create event rating");
+  }
+  return await response.json();
+};
+
+export const updateEventRating = async (id, data) => {
+  const token = localStorage.getItem("session_token");
+  const baseURL = getBaseUrl();
+  const isFormData = data instanceof FormData;
+  const options = {
+    method: "PUT",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isFormData && { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  };
+  const response = await fetch(`${baseURL}/rating/${id}`, options);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update event rating");
+  }
+  return await response.json();
+};
+
+export const deleteEventRating = async (id) => {
+  return apiCall(`/rating/${id}`, {
     method: "DELETE",
   });
 };

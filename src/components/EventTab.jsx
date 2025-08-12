@@ -112,7 +112,7 @@ function EventTab() {
     setLoading(true);
     try {
       const mockData = await getEventProduct();
-      // console.log("Fetched events:", mockData.data);
+      console.log("Fetched events:", mockData.data);
       setEvents(mockData.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -614,7 +614,7 @@ function EventTab() {
     {
       field: "price",
       headerName: "Price",
-      width: 100,
+      width: 130,
       renderCell: (params) => (
         <span>
           {params.value ? `Rp ${params.value.toLocaleString()}` : "Free"}
@@ -690,7 +690,7 @@ function EventTab() {
     {
       field: "booth",
       headerName: "Booth Applications",
-      width: 200,
+      width: 250,
       renderCell: (params) => {
         const booth = params.row.booth;
         if (!booth || booth.count === 0) {
@@ -744,6 +744,28 @@ function EventTab() {
           size="small"
         />
       ),
+    },
+    {
+      field: "average_rating",
+      headerName: "Rating",
+      width: 110,
+      renderCell: (params) => {
+        const avgRaw = params.row.average_rating;
+        const hasValue =
+          avgRaw !== null && avgRaw !== undefined && avgRaw !== "";
+        if (!hasValue || Number(avgRaw) === 0) {
+          return <span style={{ color: "#888" }}>-</span>;
+        }
+        const avg = Number(avgRaw);
+        return (
+          <div
+            style={{ display: "flex", alignItems: "center", gap: 4 }}
+            title={`Average rating ${avg.toFixed(2)} / 5`}>
+            <span>{avg.toFixed(2)}</span>
+            <span style={{ color: "#f5b400" }}>★</span>
+          </div>
+        );
+      },
     },
     {
       field: "actions",

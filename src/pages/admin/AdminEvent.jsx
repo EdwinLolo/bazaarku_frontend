@@ -6,6 +6,7 @@ import EventAreaTab from "../../components/EventAreaTab";
 import EventTab from "../../components/EventTab";
 import EventVendorTab from "../../components/EventVendorTab";
 import EventBoothTab from "../../components/EventBoothTab";
+import EventRatingTab from "../../components/EventRatingTab";
 
 function AdminEvent() {
   const [activeTab, setActiveTab] = useState("categories");
@@ -45,6 +46,13 @@ function AdminEvent() {
       icon: Building,
       component: EventBoothTab,
       description: "Manage booth assignments and layouts",
+    },
+    {
+      id: "ratings",
+      label: "Event Ratings",
+      icon: Plus,
+      component: EventRatingTab,
+      description: "Manage event ratings and feedback",
     },
   ];
 

@@ -28,6 +28,7 @@ function VendorPage() {
 
         if (data.success && data.data) {
           let isVendor = false;
+          // Your existing logic for checking if the current user is the vendor
           if (user === null) {
             const userData = localStorage.getItem("user_profile");
             if (userData) {
@@ -41,16 +42,48 @@ function VendorPage() {
               data.data.user_id === user?.id && user?.role === "vendor";
           }
 
+          const initialEvents = data.data.event || [];
+          let eventsWithRatings = [];
+
+          if (initialEvents.length > 0) {
+            const ratingPromises = initialEvents.map(event =>
+              fetch(`${getBaseUrl()}/rating/event/${event.id}`)
+                .then(res => res.ok ? res.json() : Promise.resolve({ success: false, data: [] }))
+                .catch(err => {
+                  console.error(`Error fetching rating for event ${event.id}:`, err);
+                  return { success: false, data: [] }; 
+                })
+            );
+
+            const ratingResults = await Promise.all(ratingPromises);
+
+            eventsWithRatings = initialEvents.map((event, index) => {
+              const ratingData = ratingResults[index];
+              let average_rating = 0;
+
+              if (ratingData && ratingData.success && Array.isArray(ratingData.data) && ratingData.data.length > 0) {
+                const ratings = ratingData.data;
+                const totalStars = ratings.reduce((sum, review) => sum + (review.rating_star || 0), 0);
+                average_rating = totalStars / ratings.length;
+              }
+
+              return {
+                ...event,
+                average_rating, 
+              };
+            });
+          }
+
           const vendorData = {
             ...data.data,
             isVendor: isVendor,
-            event: data.data.event || [],
+            event: eventsWithRatings, 
           };
 
           setVendor(vendorData);
           setFormData(vendorData);
 
-          console.log("Fetched vendor data:", vendorData);
+          console.log("Fetched and enriched vendor data:", vendorData);
         } else {
           setError(data.message || "Vendor not found.");
         }
@@ -62,7 +95,7 @@ function VendorPage() {
       }
     };
     fetchVendor();
-  }, [id]);
+  }, [id, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -185,24 +218,24 @@ function VendorPage() {
             <div className="flex overflow-x-auto">
               <button
                 className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${activeTab === "about"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
                 onClick={() => setActiveTab("about")}>
                 About Us
               </button>
               <button
                 className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${activeTab === "events"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
                 onClick={() => setActiveTab("events")}>
                 Events
               </button>
               <button
                 className={`px-6 py-4 font-medium text-sm md:text-base cursor-pointer ${activeTab === "contact"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
                 onClick={() => setActiveTab("contact")}>
                 Contact

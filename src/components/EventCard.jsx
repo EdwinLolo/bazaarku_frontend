@@ -2,7 +2,9 @@ import { MapPin, Calendar, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const EventCard = ({ event }) => {
-    const { banner, name, location, start_date, end_date, id, price, rating_star } = event;
+    // I'm using the corrected code from our previous conversation
+    const { banner, name, location, start_date, end_date, id, price, average_rating } = event;
+
     const formattedStartDate = new Date(start_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
     const formattedEndDate = new Date(end_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -31,10 +33,13 @@ const EventCard = ({ event }) => {
                 <div className="absolute top-3 right-3 text-md font-semibold text-white py-1 px-3 rounded-2xl bg-blue-700">{formattedPrice}</div>
             </div>
 
-            <div className="relative p-6 bg-white text-gray-900 transition-all duration-500 ease-in-out">
-                <h3 className="mb-2 text-2xl font-bold transition-colors duration-300 group-hover:text-blue-600">
-                    {name}
-                </h3>
+            {/* vvv THIS IS THE LINE THAT WAS CHANGED vvv */}
+            <div className="relative p-6 bg-white text-gray-900 transition-all duration-500 ease-in-out flex-1 flex flex-col justify-between">
+                <div> {/* This wrapper div ensures the title and its margin are grouped together at the top */}
+                    <h3 className="mb-2 text-2xl font-bold transition-colors duration-300 group-hover:text-blue-600">
+                        {name}
+                    </h3>
+                </div>
 
                 <div className="flex flex-col space-y-1 text-sm font-medium text-gray-700 transition-colors duration-300">
                     <div className="flex items-center">
@@ -48,26 +53,25 @@ const EventCard = ({ event }) => {
                     <div className="flex items-center">
                         <div className="flex mr-2">
                             {[...Array(5)].map((_, index) => {
-                                const rating = rating_star?.average || 0;
-                                const isFilled = index < Math.floor(rating);
-                                const isPartiallyFilled = index < rating && index >= Math.floor(rating);
-                                
+                                const ratingCount = average_rating || 0;
+                                const isFilled = index < Math.floor(ratingCount);
+                                const isPartiallyFilled = index < ratingCount && index >= Math.floor(ratingCount);
+
                                 return (
-                                    <Star 
+                                    <Star
                                         key={index}
-                                        className={`h-4 w-4 ${
-                                            isFilled 
-                                                ? 'text-yellow-400 fill-current' 
-                                                : isPartiallyFilled 
-                                                ? 'text-yellow-400 fill-current' 
-                                                : 'text-gray-300'
-                                        }`}
+                                        className={`h-4 w-4 ${isFilled
+                                                ? 'text-yellow-400 fill-current'
+                                                : isPartiallyFilled
+                                                    ? 'text-yellow-400 fill-current'
+                                                    : 'text-gray-300'
+                                            }`}
                                     />
                                 );
                             })}
                         </div>
                         <span className="font-semibold text-sm">
-                            {rating_star?.average ? rating_star.average.toFixed(1) : 'No rating'}
+                            {average_rating ? average_rating.toFixed(1) : 'No rating'}
                         </span>
                     </div>
                 </div>

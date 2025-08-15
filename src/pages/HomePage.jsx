@@ -52,7 +52,7 @@ function Home() {
         // Fetch all data concurrently
         const [eventsResponse, rentalsResponse, carouselResponse] =
           await Promise.all([
-            fetch(`${getBaseUrl()}/events/user?limit=3`),
+            fetch(`${getBaseUrl()}/events?limit=3`),
             fetch(`${getBaseUrl()}/rentals/users?limit=5`),
             fetch(`${getBaseUrl()}/banners/active`),
           ]);
@@ -61,6 +61,7 @@ function Home() {
         const eventsData = await eventsResponse.json();
         if (eventsResponse.ok && eventsData && Array.isArray(eventsData.data)) {
           setEvents(eventsData.data);
+          console.log("Fetched events data:", eventsData.data);
         } else {
           console.error(
             "API response for events does not contain a data array:",

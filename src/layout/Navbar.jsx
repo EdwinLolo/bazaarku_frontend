@@ -28,6 +28,7 @@ const Navbar = () => {
     { name: "Home", to: "/" },
     { name: "Rental", to: "/rentals" },
     { name: "Events", to: "/events" },
+    { name: "About Us", to: "/about" }
   ];
 
   const handleDropdownToggle = () => {
@@ -70,6 +71,7 @@ const Navbar = () => {
           const response = await fetch(
             `${getBaseUrl()}/vendors/user/${user.id}`
           );
+          console.log("Response Vendor ID", response);
           if (!response.ok) {
             throw new Error("Failed to fetch vendor data");
           }
@@ -177,6 +179,12 @@ const Navbar = () => {
                             Your Vendor Page
                           </Link>
                         )}
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="w-full text-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">
+                          Profile
+                        </Link>
                         <button
                           onClick={handleLogout}
                           disabled={loading}

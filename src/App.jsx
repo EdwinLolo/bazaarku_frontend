@@ -19,6 +19,8 @@ import EventsPage from "./pages/EventsPage";
 import VendorPage from "./pages/VendorPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import AboutUsPage from "./pages/AboutUsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // Admin imports
 import AdminLayout from "./layout/AdminLayout";
@@ -27,6 +29,7 @@ import AdminAddUser from "./pages/admin/AdminAddUser";
 import AdminEvent from "./pages/admin/AdminEvent";
 import AdminRental from "./pages/admin/AdminRental";
 import AdminAplication from "./pages/admin/AdminAplication";
+import ErrorPage from "./pages/ErrorPage";
 
 // Create Auth Context
 const AuthContext = createContext();
@@ -223,7 +226,12 @@ function AdminLayoutWrapper() {
 const router = createBrowserRouter([
     {
         element: <PublicLayout />,
+        errorElement: <ErrorPage />,
         children: [
+            {
+                path: "/error-testing",
+                element: <ErrorPage />
+            },
             {
                 path: "/",
                 element: <Home />
@@ -231,6 +239,14 @@ const router = createBrowserRouter([
             {
                 path: "/rentals",
                 element: <RentalsPage />
+            },
+            {
+                path: "/about",
+                element: <AboutUsPage />
+            },
+            {
+                path: "/profile",
+                element: <ProfilePage />
             },
             {
                 path: "/events",

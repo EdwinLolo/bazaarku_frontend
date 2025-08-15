@@ -1,8 +1,8 @@
-import { MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const EventCard = ({ event }) => {
-    const { banner, name, location, start_date, end_date, id, price } = event;
+    const { banner, name, location, start_date, end_date, id, price, rating_star } = event;
     const formattedStartDate = new Date(start_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
     const formattedEndDate = new Date(end_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -44,6 +44,31 @@ const EventCard = ({ event }) => {
                     <div className="flex items-center">
                         <Calendar className="mr-2 h-4 w-4 text-emerald-500" />
                         <span>{date}</span>
+                    </div>
+                    <div className="flex items-center">
+                        <div className="flex mr-2">
+                            {[...Array(5)].map((_, index) => {
+                                const rating = rating_star?.average || 0;
+                                const isFilled = index < Math.floor(rating);
+                                const isPartiallyFilled = index < rating && index >= Math.floor(rating);
+                                
+                                return (
+                                    <Star 
+                                        key={index}
+                                        className={`h-4 w-4 ${
+                                            isFilled 
+                                                ? 'text-yellow-400 fill-current' 
+                                                : isPartiallyFilled 
+                                                ? 'text-yellow-400 fill-current' 
+                                                : 'text-gray-300'
+                                        }`}
+                                    />
+                                );
+                            })}
+                        </div>
+                        <span className="font-semibold text-sm">
+                            {rating_star?.average ? rating_star.average.toFixed(1) : 'No rating'}
+                        </span>
                     </div>
                 </div>
             </div>

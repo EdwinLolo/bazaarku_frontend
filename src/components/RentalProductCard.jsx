@@ -1,9 +1,8 @@
 import { MapPin, Clock, CheckCircle } from "lucide-react";
 
 const RentalProductCard = ({ product, className = '', onClick }) => {
-    const { id, banner, name, price, location, is_ready } = product;
+    const { banner, name, price, location, is_ready } = product;
 
-    // Corrected: Declare the variable outside the JSX return statement
     const formattedPrice = typeof price === 'number'
         ? price.toLocaleString('id-ID', {
             style: 'currency',
@@ -19,13 +18,13 @@ const RentalProductCard = ({ product, className = '', onClick }) => {
                 flex flex-col h-full ${className}`}
             onClick={onClick}
         >
-            {/* ... (rest of the component is unchanged) */}
-            <div className="absolute top-4 left-4 z-10">
+            <div className="absolute top-4 right-4 z-10">
                 <span
-                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm
+                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full
                         ${is_ready
-                            ? 'bg-green-500/10 text-green-800 border border-green-200'
-                            : 'bg-amber-500/10 text-amber-800 border border-amber-200'}`}
+                            // Use solid background colors for better visibility
+                            ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                            : 'bg-amber-100 text-amber-800 border-2 border-amber-300'}`}
                 >
                     {is_ready ? <CheckCircle size={14} className="text-green-600" /> : <Clock size={14} className="text-amber-600" />}
                     <span className="mt-0.5">{is_ready ? "Available Now" : "Reserved"}</span>
@@ -37,6 +36,8 @@ const RentalProductCard = ({ product, className = '', onClick }) => {
                     src={banner}
                     alt={name}
                     className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                    // Added a fallback placeholder image in case the banner URL is broken
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/e2e8f0/475569?text=Image+Not+Found' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
@@ -46,7 +47,7 @@ const RentalProductCard = ({ product, className = '', onClick }) => {
                     {name}
                 </h3>
 
-                <div className="">
+                <div>
                     <div className="flex items-end justify-between">
                         <div className="text-xl font-bold text-gray-900">
                             {formattedPrice}

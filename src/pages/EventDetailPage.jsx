@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Calendar, Users, Store, Phone, CircleAlert, RefreshCw } from "lucide-react";
+import { MapPin, Calendar, Users, Store, Phone, Star, User } from "lucide-react";
 import { FaWhatsapp } from 'react-icons/fa';
 import Swal from "sweetalert2";
 
@@ -13,9 +13,47 @@ import ErrorDisplay from "../components/ErrorDisplay";
 import LoginPopup from "../components/popup/LoginPopup";
 import CreateAccountPopup from "../components/popup/CreateAccountPopup";
 
+const StarRating = React.memo(({ rating, className = '' }) => {
+    const stars = useMemo(() => {
+        return [...Array(5)].map((_, index) => (
+            <Star
+                key={index}
+                size={16}
+                className={index < Math.round(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}
+            />
+        ));
+    }, [rating]);
+
+    return (
+        <div className={`flex items-center ${className}`}>
+            {stars}
+        </div>
+    );
+});
+
+StarRating.displayName = 'StarRating';
+
+const ReviewCard = React.memo(({ review }) => (
+    <div className="border-t border-gray-200 pt-6">
+        <div className="flex items-center mb-2">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                <User size={20} className="text-indigo-600" />
+            </div>
+            <div>
+                <p className="font-semibold text-gray-800">{review.name}</p>
+                <StarRating rating={review.rating_star} />
+            </div>
+        </div>
+        <p className="text-gray-600 leading-relaxed">{review.review}</p>
+    </div>
+));
+
+ReviewCard.displayName = 'ReviewCard';
+
 const EventDetailPage = () => {
     const { id } = useParams();
     const [event, setEvent] = useState(null);
+    const [ratings, setRatings] = useState({ reviews: [], average: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
@@ -26,64 +64,122 @@ const EventDetailPage = () => {
     const { user } = useAuth();
     const user_profile = localStorage.getItem("user_profile");
 
-    const isLoggedIn = user !== null && user !== undefined || user_profile !== null && user_profile !== undefined;
+    const isLoggedIn = useMemo(() => 
+        (user !== null && user !== undefined) || 
+        (user_profile !== null && user_profile !== undefined), 
+        [user, user_profile]
+    );
 
-    useEffect(() => {
-        const fetchEvent = async () => {
-            try {
-                const response = await fetch(`${getBaseUrl()}/events/${id}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch event details');
-                }
-                const data = await response.json();
+    const fetchEvent = useCallback(async (retryCount = 0) => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const [eventResponse, ratingResponse] = await Promise.all([
+                fetch(`${getBaseUrl()}/events/${id}`),
+                fetch(`${getBaseUrl()}/rating/event/${id}`)
+            ]);
 
-                if (data.success && data.data) {
-                    const eventData = {
-                        ...data.data,
-                        total_booths: data.data.total_booths || 50,
-                        price: data.data.price || 0,
-                        contact: data.data.contact || '6281234567890',
-                    };
-                    setEvent(eventData);
-                } else {
-                    setError('Event not found.');
-                }
-            } catch (err) {
-                console.error("Error fetching event details:", err);
-                setError('An error occurred while fetching event details.');
-            } finally {
-                setLoading(false);
+            if (!eventResponse.ok) {
+                throw new Error(`Event fetch failed: ${eventResponse.status}`);
             }
-        };
-        fetchEvent();
+            
+            if (!ratingResponse.ok) {
+                throw new Error(`Rating fetch failed: ${ratingResponse.status}`);
+            }
+
+            const [eventData, ratingData] = await Promise.all([
+                eventResponse.json(),
+                ratingResponse.json()
+            ]);
+
+            if (eventData.success && eventData.data) {
+                const event = eventData.data;
+                const acceptedBoothsCount = (event.booth || []).filter(b => b.is_acc === 'APPROVED').length;
+                setEvent({ ...event, accepted_booths: acceptedBoothsCount });
+            } else {
+                setError('Event not found.');
+                return;
+            }
+
+            if (ratingData.success && ratingData.data) {
+                const reviews = ratingData.data;
+                const totalStars = reviews.reduce((acc, r) => acc + r.rating_star, 0);
+                const average = reviews.length > 0 ? totalStars / reviews.length : 0;
+                setRatings({ reviews, average });
+            }
+        } catch (err) {
+            console.error("Error fetching event details:", err);
+            
+            // Retry logic for network errors
+            if (retryCount < 2 && (err.name === 'TypeError' || err.message.includes('fetch failed'))) {
+                setTimeout(() => fetchEvent(retryCount + 1), 1000 * (retryCount + 1));
+                return;
+            }
+            
+            setError(err.message || 'An error occurred while fetching event details.');
+        } finally {
+            setLoading(false);
+        }
     }, [id]);
 
-    if (loading) {
-        return <Loading />;
-    }
+    // Handle booth application with proper authentication check
+    const handleBoothApplication = useCallback(() => {
+        if (!isLoggedIn) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Required',
+                text: 'You must be logged in to apply for a booth.',
+                confirmButtonText: 'Login',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setShowLogin(true);
+                }
+            });
+            return;
+        }
+        
+        setSelectedEvent(event);
+        setShowPopup(true);
+    }, [isLoggedIn, event]);
 
-    if (error) {
-        return (
-            <ErrorDisplay error={error} onRetry={() => window.location.reload()} />
-        );
-    }
+    useEffect(() => {
+        if (id) {
+            fetchEvent();
+        }
+    }, [fetchEvent, id]);
 
-    if (!event) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <p className="text-xl text-gray-600">Event not found.</p>
-            </div>
-        );
-    }
+    // Memoized date formatting to avoid recalculating on each render
+    const formattedDates = useMemo(() => {
+        if (!event) return { dateRange: '', formattedStartDate: '', formattedEndDate: '' };
+        
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedStartDate = new Date(event.start_date).toLocaleDateString(undefined, options);
+        const formattedEndDate = new Date(event.end_date).toLocaleDateString(undefined, options);
+        const dateRange = `${formattedStartDate} - ${formattedEndDate}`;
+        
+        return { dateRange, formattedStartDate, formattedEndDate };
+    }, [event]);
 
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedStartDate = new Date(event.start_date).toLocaleDateString(undefined, options);
-    const formattedEndDate = new Date(event.end_date).toLocaleDateString(undefined, options);
-    const dateRange = `${formattedStartDate} - ${formattedEndDate}`;
+    // Memoized booth statistics
+    const boothStats = useMemo(() => {
+        if (!event) return { totalBooths: 0, bookedBooths: 0, availableBooths: 0 };
+        
+        const totalBooths = event.booth_slot || 0;
+        const bookedBooths = event.accepted_booths || 0;
+        const availableBooths = Math.max(0, totalBooths - bookedBooths);
+        
+        return { totalBooths, bookedBooths, availableBooths };
+    }, [event]);
 
-    const getStatusBadge = (status) => {
+    // Memoized status badge to avoid recalculating on each render
+    const statusBadge = useMemo(() => {
+        if (!event?.status) return null;
+        
         let colorClass = '';
-        switch (status) {
+        switch (event.status) {
             case 'upcoming':
                 colorClass = 'bg-blue-600';
                 break;
@@ -96,35 +192,54 @@ const EventDetailPage = () => {
             default:
                 colorClass = 'bg-gray-500';
         }
+        
         return (
             <span className={`px-4 py-1.5 text-sm font-semibold text-white rounded-full ${colorClass} shadow-md`}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
             </span>
         );
-    };
+    }, [event?.status]);
 
-    const totalBooths = event.total_booths;
-    const bookedBooths = event.accepted_booths;
-    const availableBooths = totalBooths - bookedBooths;
+    // Memoized price display
+    const priceDisplay = useMemo(() => {
+        if (!event?.price) return 'Free';
+        if (event.price === '-') return 'Free';
+        
+        const price = Number(event.price);
+        return isNaN(price) ? 'Free' : `Rp${price.toLocaleString('id-ID')}`;
+    }, [event?.price]);
 
-    if (showPopup && !isLoggedIn) {
+    if (loading) {
+        return <Loading />;
+    }
+
+    if (error) {
         return (
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Required',
-                text: 'You must be logged in to apply for a booth.',
-                confirmButtonText: 'Login',
-                showCancelButton: true,
-                cancelButtonText: 'Cancel',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    setShowLogin(true);
-                } else {
-                    setShowPopup(false);
-                }
-            })
+            <ErrorDisplay 
+                error={error} 
+                onRetry={fetchEvent} 
+            />
         );
     }
+
+    if (!event) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="text-center">
+                    <p className="text-xl text-gray-600 mb-4">Event not found.</p>
+                    <Link 
+                        to="/events" 
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Browse Events
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    const { dateRange } = formattedDates;
+    const { totalBooths, bookedBooths, availableBooths } = boothStats;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -134,6 +249,11 @@ const EventDetailPage = () => {
                     src={event.banner}
                     alt={event.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                        e.target.src = '/placeholder-event-banner.jpg';
+                        e.target.onerror = null;
+                    }}
+                    loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
 
@@ -149,7 +269,7 @@ const EventDetailPage = () => {
                                     {event.event_category?.name || 'Event'}
                                 </p>
                             </div>
-                            {getStatusBadge(event.status)}
+                            {statusBadge}
                         </div>
                     </div>
                 </div>
@@ -210,20 +330,43 @@ const EventDetailPage = () => {
                                 <div className="text-center sm:text-left mb-4 sm:mb-0">
                                     <p className="text-sm font-medium text-gray-600">Booth Application Price</p>
                                     <p className="text-xl font-bold text-gray-900 mt-1">
-                                        {event.price && event.price !== '-' ? `Rp${Number(event.price).toLocaleString('id-ID')}` : 'Free'}
+                                        {priceDisplay}
                                     </p>
                                 </div>
                                 <button
-                                    onClick={() => {
-                                        setSelectedEvent(event);
-                                        setShowPopup(true);
-                                    }}
-                                    className="inline-flex items-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    onClick={handleBoothApplication}
+                                    disabled={availableBooths === 0}
+                                    className={`inline-flex items-center px-8 py-3 font-semibold rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                        availableBooths === 0 
+                                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                            : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-blue-500'
+                                    }`}
                                 >
                                     <Store className="h-5 w-5 mr-2" />
-                                    Apply for Booth
+                                    {availableBooths === 0 ? 'Fully Booked' : 'Apply for Booth'}
                                 </button>
                             </div>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Reviews & Ratings</h2>
+                            {ratings.reviews.length > 0 ? (
+                                <>
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="flex items-center gap-2">
+                                            <Star size={24} className="text-yellow-400 fill-current" />
+                                            <span className="text-2xl font-bold text-gray-800">{ratings.average.toFixed(1)}</span>
+                                        </div>
+                                        <p className="text-gray-600">based on {ratings.reviews.length} reviews</p>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {ratings.reviews.map((review, index) => (
+                                            <ReviewCard key={index} review={review} />
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <p className="text-gray-600">No reviews yet for this event.</p>
+                            )}
                         </div>
                     </div>
 
@@ -285,7 +428,7 @@ const EventDetailPage = () => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Status</span>
-                                    <span className="text-sm">{getStatusBadge(event.status)}</span>
+                                    <span className="text-sm">{statusBadge}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-600">Category</span>

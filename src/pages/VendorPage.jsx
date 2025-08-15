@@ -50,7 +50,7 @@ function VendorPage() {
           setVendor(vendorData);
           setFormData(vendorData);
 
-          // console.log("Fetched vendor data:", vendorData);
+          console.log("Fetched vendor data:", vendorData);
         } else {
           setError(data.message || "Vendor not found.");
         }
@@ -137,14 +137,14 @@ function VendorPage() {
 
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-end pb-10">
           <div className="relative bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-lg max-w-3xl">
-            {vendor.isVendor && (
+            {/* {vendor.isVendor && (
               <button
                 onClick={() => setIsEditing(true)}
                 className="absolute top-4 right-4 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors z-20"
                 aria-label="Edit Profile">
                 <Edit className="w-5 h-5 cursor-pointer" />
               </button>
-            )}
+            )} */}
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="bg-gray-100 rounded-xl w-24 h-24 md:w-32 md:h-32 border-3 border-black flex items-center justify-center">
                 <span className="text-5xl font-bold text-gray-700">
@@ -362,7 +362,7 @@ function VendorPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-start">
+                    {/* <div className="flex items-start">
                       <div className="bg-blue-100 p-3 rounded-lg mr-4">
                         <Globe className="text-blue-600 w-5 h-5" />
                       </div>
@@ -375,7 +375,7 @@ function VendorPage() {
                           .com
                         </a>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="mt-8">

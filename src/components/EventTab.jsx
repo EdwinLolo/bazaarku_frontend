@@ -113,7 +113,7 @@ function EventTab() {
     setLoading(true);
     try {
       const mockData = await getEventProduct();
-      console.log("Fetched events:", mockData.data);
+      // console.log("Fetched events:", mockData.data);
       setEvents(mockData.data);
     } catch (error) {
       console.error("Error fetching events:", error);

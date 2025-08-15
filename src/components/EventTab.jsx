@@ -66,6 +66,7 @@ function EventTab() {
     category: "", // ✅ Add this for category name
     event_category_id: "", // This is for event_category_id
     location: "",
+    booth_slot: 10, // Default booth slot
     contact: "",
     start_date: "",
     end_date: "",
@@ -298,6 +299,7 @@ function EventTab() {
       end_date: "",
       price: "",
       location: "",
+      booth_slot: 10, // Default booth slot
       contact: "",
       banner: "",
       permit_img: "",
@@ -327,6 +329,7 @@ function EventTab() {
       end_date: event.end_date || "",
       price: event.price || "",
       location: event.location || "",
+      booth_slot: event.booth_slot || 10, // Default booth slot
       contact: event.contact || "",
       banner: event.banner || "",
       permit_img: event.permit_img || "",
@@ -428,6 +431,7 @@ function EventTab() {
           start_date: formData.start_date,
           end_date: formData.end_date,
           price: formData.price,
+          booth_slot: formData.booth_slot || 10, // Default booth slot
           location: formData.location,
           contact: formData.contact,
         };
@@ -482,6 +486,7 @@ function EventTab() {
           end_date: formData.end_date,
           price: formData.price,
           location: formData.location,
+          booth_slot: formData.booth_slot || 10, // Default booth slot
           contact: formData.contact,
           banner: formData.banner,
           permit_img: formData.permit_img,
@@ -608,6 +613,7 @@ function EventTab() {
       ),
     },
     { field: "location", headerName: "Location", width: 120 },
+    { field: "booth_slot", headerName: "Booth Slot", width: 120 },
     { field: "contact", headerName: "Contact", width: 120 },
     { field: "start_date", headerName: "Start Date", width: 120 },
     { field: "end_date", headerName: "End Date", width: 120 },
@@ -903,6 +909,14 @@ function EventTab() {
               value={formData.location}
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
+              }
+            />
+            <TextField
+              label="Booth Slot"
+              fullWidth
+              value={formData.booth_slot}
+              onChange={(e) =>
+                setFormData({ ...formData, booth_slot: e.target.value })
               }
             />
             <TextField

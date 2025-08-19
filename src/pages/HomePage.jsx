@@ -52,7 +52,7 @@ function Home() {
         // Fetch all data concurrently
         const [eventsResponse, rentalsResponse, carouselResponse] =
           await Promise.all([
-            fetch(`${getBaseUrl()}/events?limit=3`),
+            fetch(`${getBaseUrl()}/events?limit=3&sort_by=start_date&order=desc`),
             fetch(`${getBaseUrl()}/rentals/users?limit=5`),
             fetch(`${getBaseUrl()}/banners/active`),
           ]);

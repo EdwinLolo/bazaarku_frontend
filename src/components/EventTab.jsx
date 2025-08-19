@@ -259,6 +259,7 @@ function EventTab() {
   };
 
   const handleViewApplicationDetails = (application) => {
+    setBoothDialogOpen(false);
     Swal.fire({
       title: "Application Details",
       html: `
@@ -1031,7 +1032,13 @@ function EventTab() {
                     });
                   }
                 }}
-                style={{ marginTop: 8 }}
+                style={{
+                  marginTop: 8,
+                  cursor: "pointer",
+                  background: "#f5f5f5",
+                  borderRadius: 4,
+                  padding: "4px 8px",
+                }}
               />
               {formData.banner_file && (
                 <Typography variant="body2" color="primary" mt={1}>
@@ -1126,7 +1133,13 @@ function EventTab() {
                     });
                   }
                 }}
-                style={{ marginTop: 8 }}
+                style={{
+                  marginTop: 8,
+                  cursor: "pointer",
+                  background: "#f5f5f5",
+                  borderRadius: 4,
+                  padding: "4px 8px",
+                }}
               />
               {formData.permit_file && (
                 <Typography variant="body2" color="primary" mt={1}>

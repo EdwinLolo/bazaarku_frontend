@@ -540,7 +540,13 @@ function RentalCategoryTab() {
                   type="file"
                   accept="image/*"
                   onChange={handleBannerFileChange}
-                  style={{ marginTop: 8 }}
+                  style={{
+                    marginTop: 8,
+                    cursor: "pointer",
+                    background: "#f5f5f5",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                  }}
                   key={editingCategory?.id || "new"}
                 />
                 <Typography

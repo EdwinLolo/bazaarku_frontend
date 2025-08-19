@@ -77,7 +77,7 @@ function EventsPage() {
         }
 
         const response = await fetch(
-          `${getBaseUrl()}/events?sort_by=start_date&order_by=desc&${filterParams.toString()}`
+          `${getBaseUrl()}/events?sort_by=start_date&sort_order=desc&${filterParams.toString()}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch events");

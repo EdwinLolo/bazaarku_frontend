@@ -1,4 +1,9 @@
-import { apiCall, getBaseUrl } from "./utils";
+import {
+  apiCall,
+  getBaseUrl,
+  forceLogout,
+  notifyAuthExpiredAndRedirect,
+} from "./utils";
 
 export const getUserData = async () => {
   return apiCall("/admin/users", {
@@ -86,10 +91,7 @@ export const getEventProduct = async () => {
 export const updateEvent = async (eventId, eventData) => {
   const token = localStorage.getItem("session_token");
   const baseURL = getBaseUrl();
-
-  // Check if eventData is FormData (for file uploads) or regular object
   const isFormData = eventData instanceof FormData;
-
   const options = {
     method: "PUT",
     headers: {
@@ -102,6 +104,11 @@ export const updateEvent = async (eventId, eventData) => {
 
   const response = await fetch(`${baseURL}/events/${eventId}`, options);
 
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || "Failed to update event");
@@ -113,10 +120,7 @@ export const updateEvent = async (eventId, eventData) => {
 export const createEvent = async (eventData) => {
   const token = localStorage.getItem("session_token");
   const baseURL = getBaseUrl();
-
-  // Check if eventData is FormData (for file uploads) or regular object
   const isFormData = eventData instanceof FormData;
-
   const options = {
     method: "POST",
     headers: {
@@ -128,6 +132,11 @@ export const createEvent = async (eventData) => {
   };
 
   const response = await fetch(`${baseURL}/events`, options);
+
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
 
   if (!response.ok) {
     const error = await response.json();
@@ -168,6 +177,11 @@ export const createEventVendor = async (vendorData) => {
   };
 
   const response = await fetch(`${baseURL}/vendors`, options);
+
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
 
   if (!response.ok) {
     const error = await response.json();
@@ -218,6 +232,11 @@ export const updateEventVendor = async (vendorId, vendorData) => {
   console.log("Making request to:", `${baseURL}/vendors/${vendorId}`);
 
   const response = await fetch(`${baseURL}/vendors/${vendorId}`, options);
+
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
 
   console.log("Response status:", response.status);
   console.log("Response headers:", response.headers);
@@ -315,6 +334,11 @@ export const createRentalCategory = async (data) => {
 
     const response = await fetch(`${baseURL}/rentals`, options);
 
+    if (response.status === 401 || response.status === 402) {
+      await notifyAuthExpiredAndRedirect();
+      throw new Error("Session expired. Redirecting to login...");
+    }
+
     console.log("Response status:", response.status);
     console.log("Response headers:", response.headers);
     console.log("Response content-type:", response.headers.get("content-type"));
@@ -384,6 +408,11 @@ export const updateRentalCategory = async (id, data) => {
     console.log("Making request to:", `${baseURL}/rentals/${id}`);
 
     const response = await fetch(`${baseURL}/rentals/${id}`, options);
+
+    if (response.status === 401 || response.status === 402) {
+      await notifyAuthExpiredAndRedirect();
+      throw new Error("Session expired. Redirecting to login...");
+    }
 
     console.log("Response status:", response.status);
     console.log("Response content-type:", response.headers.get("content-type"));
@@ -458,6 +487,11 @@ export const createRentalProduct = async (data) => {
   // Changed endpoint from /rentals to /rental-products
   const response = await fetch(`${baseURL}/rental-products`, options);
 
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Failed to create rental product");
@@ -483,6 +517,11 @@ export const updateRentalProduct = async (id, data) => {
 
   // Changed endpoint
   const response = await fetch(`${baseURL}/rental-products/${id}`, options);
+
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
 
   if (!response.ok) {
     const error = await response.json();
@@ -522,6 +561,11 @@ export const createBanner = async (data) => {
   // Changed endpoint from /rentals to /rental-products
   const response = await fetch(`${baseURL}/banners`, options);
 
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Failed to create rental product");
@@ -547,6 +591,11 @@ export const updateBanner = async (id, data) => {
 
   // Changed endpoint
   const response = await fetch(`${baseURL}/banners/${id}`, options);
+
+  if (response.status === 401 || response.status === 402) {
+    await notifyAuthExpiredAndRedirect();
+    throw new Error("Session expired. Redirecting to login...");
+  }
 
   if (!response.ok) {
     const error = await response.json();

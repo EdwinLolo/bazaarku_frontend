@@ -450,6 +450,7 @@ const EventDetailPage = () => {
             {showPopup && isLoggedIn && (
                 <ApplyBoothPopup
                     event={selectedEvent}
+                    user_id={user.id}
                     onClose={() => setShowPopup(false)}
                 />
             )}

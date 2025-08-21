@@ -3,7 +3,7 @@ import { X, Loader2, User, Phone, MessageSquare } from 'lucide-react';
 import { getBaseUrl } from "../../models/utils";
 import Swal from "sweetalert2";
 
-function ApplyBoothPopup({ event, onClose }) {
+function ApplyBoothPopup({ event, user_id, onClose }) {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -69,7 +69,7 @@ function ApplyBoothPopup({ event, onClose }) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ ...formData, event_id: event.id }),
+                body: JSON.stringify({ ...formData, event_id: event.id, user_id: user_id }),
             });
 
             const responseData = await response.json();

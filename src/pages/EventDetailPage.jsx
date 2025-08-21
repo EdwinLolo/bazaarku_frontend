@@ -12,6 +12,7 @@ import ApplyBoothPopup from "../components/popup/ApplyBoothPopup";
 import ErrorDisplay from "../components/ErrorDisplay";
 import LoginPopup from "../components/popup/LoginPopup";
 import CreateAccountPopup from "../components/popup/CreateAccountPopup";
+import ReviewPopup from "../components/popup/ReviewPopup";
 
 const StarRating = React.memo(({ rating, className = '' }) => {
     const stars = useMemo(() => {
@@ -57,6 +58,8 @@ const EventDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const [showPopupReview, setShowPopupReview] = useState(false);
+    const [isReviewAble, setIsReviewAble] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showLogin, setShowLogin] = useState(false);
     const [showCreate, setShowCreate] = useState(false);
@@ -64,9 +67,9 @@ const EventDetailPage = () => {
     const { user } = useAuth();
     const user_profile = localStorage.getItem("user_profile");
 
-    const isLoggedIn = useMemo(() => 
-        (user !== null && user !== undefined) || 
-        (user_profile !== null && user_profile !== undefined), 
+    const isLoggedIn = useMemo(() =>
+        (user !== null && user !== undefined) ||
+        (user_profile !== null && user_profile !== undefined),
         [user, user_profile]
     );
 
@@ -74,7 +77,7 @@ const EventDetailPage = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const [eventResponse, ratingResponse] = await Promise.all([
                 fetch(`${getBaseUrl()}/events/${id}`),
                 fetch(`${getBaseUrl()}/rating/event/${id}`)
@@ -83,7 +86,7 @@ const EventDetailPage = () => {
             if (!eventResponse.ok) {
                 throw new Error(`Event fetch failed: ${eventResponse.status}`);
             }
-            
+
             if (!ratingResponse.ok) {
                 throw new Error(`Rating fetch failed: ${ratingResponse.status}`);
             }
@@ -95,6 +98,8 @@ const EventDetailPage = () => {
 
             if (eventData.success && eventData.data) {
                 const event = eventData.data;
+                console.log('Check Event Data', event);
+
                 const acceptedBoothsCount = (event.booth || []).filter(b => b.is_acc === 'APPROVED').length;
                 setEvent({ ...event, accepted_booths: acceptedBoothsCount });
             } else {
@@ -108,20 +113,32 @@ const EventDetailPage = () => {
                 const average = reviews.length > 0 ? totalStars / reviews.length : 0;
                 setRatings({ reviews, average });
             }
+
+            // Check if user can write more reviews based on approved booths vs existing reviews
+            if (user?.id && eventData.success && eventData.data && ratingData.success) {
+                const userApprovedBoothsCount = (eventData.data.booth || []).filter(b => b.is_acc === 'APPROVED' && b.user_id === user.id).length;
+                const userExistingReviewsCount = (ratingData.data || []).filter(r => r.user_id === user.id).length;
+                
+                // User can review if they have approved booths and haven't reached the review limit
+                const canWriteMoreReviews = userApprovedBoothsCount > 0 && userExistingReviewsCount < userApprovedBoothsCount;
+                setIsReviewAble(canWriteMoreReviews);
+            } else {
+                setIsReviewAble(false);
+            }
         } catch (err) {
             console.error("Error fetching event details:", err);
-            
+
             // Retry logic for network errors
             if (retryCount < 2 && (err.name === 'TypeError' || err.message.includes('fetch failed'))) {
                 setTimeout(() => fetchEvent(retryCount + 1), 1000 * (retryCount + 1));
                 return;
             }
-            
+
             setError(err.message || 'An error occurred while fetching event details.');
         } finally {
             setLoading(false);
         }
-    }, [id]);
+    }, [id, user]);
 
     // Handle booth application with proper authentication check
     const handleBoothApplication = useCallback(() => {
@@ -140,9 +157,40 @@ const EventDetailPage = () => {
             });
             return;
         }
-        
+
         setSelectedEvent(event);
         setShowPopup(true);
+    }, [isLoggedIn, event]);
+
+    // Calculate remaining reviews for display
+    const remainingReviews = useMemo(() => {
+        if (!user?.id || !event || !ratings.reviews) return 0;
+        
+        const userApprovedBoothsCount = (event.booth || []).filter(b => b.is_acc === 'APPROVED' && b.user_id === user.id).length;
+        const userExistingReviewsCount = ratings.reviews.filter(r => r.user_id === user.id).length;
+        
+        return Math.max(0, userApprovedBoothsCount - userExistingReviewsCount);
+    }, [user?.id, event, ratings.reviews]);
+
+    const handleNewReview = useCallback(() => {
+        if (!isLoggedIn) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Required',
+                text: 'You must be logged in to write a review.',
+                confirmButtonText: 'Login',
+                showCancelButton: true,
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setShowLogin(true);
+                }
+            });
+            return;
+        }
+
+        setSelectedEvent(event);
+        setShowPopupReview(true);
     }, [isLoggedIn, event]);
 
     useEffect(() => {
@@ -154,30 +202,30 @@ const EventDetailPage = () => {
     // Memoized date formatting to avoid recalculating on each render
     const formattedDates = useMemo(() => {
         if (!event) return { dateRange: '', formattedStartDate: '', formattedEndDate: '' };
-        
+
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const formattedStartDate = new Date(event.start_date).toLocaleDateString(undefined, options);
         const formattedEndDate = new Date(event.end_date).toLocaleDateString(undefined, options);
         const dateRange = `${formattedStartDate} - ${formattedEndDate}`;
-        
+
         return { dateRange, formattedStartDate, formattedEndDate };
     }, [event]);
 
     // Memoized booth statistics
     const boothStats = useMemo(() => {
         if (!event) return { totalBooths: 0, bookedBooths: 0, availableBooths: 0 };
-        
+
         const totalBooths = event.booth_slot || 0;
         const bookedBooths = event.accepted_booths || 0;
         const availableBooths = Math.max(0, totalBooths - bookedBooths);
-        
+
         return { totalBooths, bookedBooths, availableBooths };
     }, [event]);
 
     // Memoized status badge to avoid recalculating on each render
     const statusBadge = useMemo(() => {
         if (!event?.status) return null;
-        
+
         let colorClass = '';
         switch (event.status) {
             case 'upcoming':
@@ -192,7 +240,7 @@ const EventDetailPage = () => {
             default:
                 colorClass = 'bg-gray-500';
         }
-        
+
         return (
             <span className={`px-4 py-1.5 text-sm font-semibold text-white rounded-full ${colorClass} shadow-md`}>
                 {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
@@ -204,7 +252,7 @@ const EventDetailPage = () => {
     const priceDisplay = useMemo(() => {
         if (!event?.price) return 'Free';
         if (event.price === '-') return 'Free';
-        
+
         const price = Number(event.price);
         return isNaN(price) ? 'Free' : `Rp${price.toLocaleString('id-ID')}`;
     }, [event?.price]);
@@ -215,9 +263,9 @@ const EventDetailPage = () => {
 
     if (error) {
         return (
-            <ErrorDisplay 
-                error={error} 
-                onRetry={fetchEvent} 
+            <ErrorDisplay
+                error={error}
+                onRetry={fetchEvent}
             />
         );
     }
@@ -227,8 +275,8 @@ const EventDetailPage = () => {
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
                 <div className="text-center">
                     <p className="text-xl text-gray-600 mb-4">Event not found.</p>
-                    <Link 
-                        to="/events" 
+                    <Link
+                        to="/events"
                         className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Browse Events
@@ -336,11 +384,10 @@ const EventDetailPage = () => {
                                 <button
                                     onClick={handleBoothApplication}
                                     disabled={availableBooths === 0}
-                                    className={`inline-flex items-center px-8 py-3 font-semibold rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                                        availableBooths === 0 
-                                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                                            : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-blue-500'
-                                    }`}
+                                    className={`inline-flex items-center px-8 py-3 font-semibold rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${availableBooths === 0
+                                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                        : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-blue-500'
+                                        }`}
                                 >
                                     <Store className="h-5 w-5 mr-2" />
                                     {availableBooths === 0 ? 'Fully Booked' : 'Apply for Booth'}
@@ -348,7 +395,20 @@ const EventDetailPage = () => {
                             </div>
                         </div>
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Reviews & Ratings</h2>
+                            <div className="flex flex-col sm:flex-row items-center justify-between">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Reviews & Ratings</h2>
+                                {isReviewAble && (
+                                    <button
+                                        onClick={handleNewReview}
+                                        disabled={!isReviewAble}
+                                        className='inline-flex items-center px-8 py-3 font-semibold rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 
+                                            bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-blue-500'
+                                    >
+                                        <Star className="h-5 w-5 mr-2" />
+                                        Write a Review {remainingReviews > 1 && `(${remainingReviews} remaining)`}
+                                    </button>
+                                )}
+                            </div>
                             {ratings.reviews.length > 0 ? (
                                 <>
                                     <div className="flex items-center gap-4 mb-6">
@@ -452,6 +512,15 @@ const EventDetailPage = () => {
                     event={selectedEvent}
                     user_id={user.id}
                     onClose={() => setShowPopup(false)}
+                />
+            )}
+
+            {/* Review Popup */}
+            {showPopupReview && isLoggedIn && (
+                <ReviewPopup
+                    event={selectedEvent}
+                    user_id={user.id}
+                    onClose={() => setShowPopupReview(false)}
                 />
             )}
 

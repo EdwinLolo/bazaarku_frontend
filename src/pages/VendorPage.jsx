@@ -51,7 +51,7 @@ function VendorPage() {
                 .then(res => res.ok ? res.json() : Promise.resolve({ success: false, data: [] }))
                 .catch(err => {
                   console.error(`Error fetching rating for event ${event.id}:`, err);
-                  return { success: false, data: [] }; 
+                  return { success: false, data: [] };
                 })
             );
 
@@ -69,7 +69,7 @@ function VendorPage() {
 
               return {
                 ...event,
-                average_rating, 
+                average_rating,
               };
             });
           }
@@ -77,7 +77,7 @@ function VendorPage() {
           const vendorData = {
             ...data.data,
             isVendor: isVendor,
-            event: eventsWithRatings, 
+            event: eventsWithRatings,
           };
 
           setVendor(vendorData);
@@ -353,15 +353,31 @@ function VendorPage() {
                   </h2>
 
                   <div className="space-y-5">
-                    <div className="flex items-start">
+                    {/* <div className="flex items-start">
                       <div className="bg-blue-100 p-3 rounded-lg mr-4">
                         <Mail className="text-blue-600 w-5 h-5" />
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900">Email</h3>
                         <p className="text-gray-600">
-                          contact@
-                          {vendor.name.toLowerCase().replace(/\s+/g, "")}.com
+                            {vendor.email}
+                        </p>
+                      </div>
+                    </div> */}
+
+                    <div className="flex items-start">
+                      <div className="bg-blue-100 p-3 rounded-lg mr-4">
+                        <FaInstagram className="text-blue-600 w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">Instagram</h3>
+                        <p className="text-gray-600">
+                          <a
+                            href={`https://instagram.com/${vendor.insta}`}
+                            className="hover:text-blue-600"
+                          >
+                            @{vendor.insta}
+                          </a>
                         </p>
                       </div>
                     </div>
@@ -393,44 +409,6 @@ function VendorPage() {
                             vendor.location.slice(1)}
                         </p>
                       </div>
-                    </div>
-
-                    {/* <div className="flex items-start">
-                      <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                        <Globe className="text-blue-600 w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">Website</h3>
-                        <a
-                          href={vendor.website || "#"}
-                          className="text-blue-600 hover:underline">
-                          www.{vendor.name.toLowerCase().replace(/\s+/g, "")}
-                          .com
-                        </a>
-                      </div>
-                    </div> */}
-                  </div>
-
-                  <div className="mt-8">
-                    <h3 className="font-medium text-gray-900 mb-4">
-                      Follow Us
-                    </h3>
-                    <div className="flex space-x-4">
-                      <a
-                        href={`https://instagram.com/${vendor.insta}`}
-                        className="bg-gray-100 p-3 rounded-full text-pink-600 hover:bg-pink-100 transition-colors">
-                        <FaInstagram className="w-5 h-5" />
-                      </a>
-                      <a
-                        href="#"
-                        className="bg-gray-100 p-3 rounded-full text-blue-600 hover:bg-blue-100 transition-colors">
-                        <FaFacebook className="w-5 h-5" />
-                      </a>
-                      <a
-                        href="#"
-                        className="bg-gray-100 p-3 rounded-full text-sky-500 hover:bg-sky-100 transition-colors">
-                        <FaTwitter className="w-5 h-5" />
-                      </a>
                     </div>
                   </div>
                 </div>

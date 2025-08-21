@@ -173,9 +173,6 @@ const AboutUsPage = () => {
                             <Link to="/events" className="inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-100 transition-colors duration-300">
                                 Explore Events
                             </Link>
-                            <Link to="/vendors" className="inline-block bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-400 transition-colors duration-300">
-                                Become a Vendor
-                            </Link>
                         </div>
                     </div>
                 </div>

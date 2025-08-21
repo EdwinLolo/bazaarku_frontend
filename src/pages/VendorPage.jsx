@@ -353,17 +353,23 @@ function VendorPage() {
                   </h2>
 
                   <div className="space-y-5">
-                    {/* <div className="flex items-start">
+                    <div className="flex items-start">
                       <div className="bg-blue-100 p-3 rounded-lg mr-4">
                         <Mail className="text-blue-600 w-5 h-5" />
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900">Email</h3>
                         <p className="text-gray-600">
-                            {vendor.email}
+                          {vendor.email ? (
+                            <span className="hover:text-blue-600">
+                              {vendor.email}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">No email provided</span>
+                          )}
                         </p>
                       </div>
-                    </div> */}
+                    </div>
 
                     <div className="flex items-start">
                       <div className="bg-blue-100 p-3 rounded-lg mr-4">

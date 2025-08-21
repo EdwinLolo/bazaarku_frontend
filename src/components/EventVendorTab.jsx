@@ -50,6 +50,7 @@ function EventVendorTab() {
     phone: "",
     insta: "",
     location: "",
+    email: "",
     user_id: "",
     banner: "",
     banner_file: null,
@@ -177,6 +178,7 @@ function EventVendorTab() {
       phone: "", // Ensure it's a string
       insta: "",
       location: "",
+      email: "",
       user_id: "",
       banner: "",
       banner_file: null,
@@ -193,6 +195,7 @@ function EventVendorTab() {
       phone: vendor.phone ? String(vendor.phone) : "", // Convert to string
       insta: vendor.insta || "",
       location: vendor.location || "",
+      email: vendor.email || "",
       user_id: vendor.user_id || "",
       banner: vendor.banner || "",
       banner_file: null,
@@ -298,6 +301,7 @@ function EventVendorTab() {
           phone: safeStringTrim(formData.phone),
           insta: safeStringTrim(formData.insta),
           location: safeStringTrim(formData.location),
+          email: safeStringTrim(formData.email),
           user_id: formData.user_id,
         };
 
@@ -383,6 +387,7 @@ function EventVendorTab() {
             phone: safeStringTrim(formData.phone),
             insta: safeStringTrim(formData.insta),
             location: safeStringTrim(formData.location),
+            email: safeStringTrim(formData.email),
             user_id: formData.user_id,
           };
 
@@ -404,6 +409,7 @@ function EventVendorTab() {
               : null,
             insta: formData.insta ? formData.insta.trim() : "",
             location: formData.location ? formData.location.trim() : "",
+            email: formData.email ? formData.email.trim() : "",
             user_id: formData.user_id,
             banner: formData.banner ? formData.banner.trim() : "",
           };
@@ -557,6 +563,12 @@ function EventVendorTab() {
     },
     { field: "location", headerName: "Location", width: 150 },
     {
+      field: "email",
+      headerName: "Email",
+      width: 200,
+      renderCell: (params) => <span>{params.value || "No email"}</span>,
+    },
+    {
       field: "banner",
       headerName: "Banner",
       width: 120,
@@ -704,6 +716,15 @@ function EventVendorTab() {
                 setFormData({ ...formData, location: e.target.value })
               }
               placeholder="Jakarta, Indonesia"
+            />
+            <TextField
+              label="Email"
+              fullWidth
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              placeholder="example@gmail.com"
             />
 
             {/* Banner Upload Section */}

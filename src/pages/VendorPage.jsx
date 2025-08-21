@@ -262,7 +262,7 @@ function VendorPage() {
                     "We specialize in creating unforgettable experiences for all types of events. With over 10 years of experience, our team of professionals brings creativity, expertise, and attention to detail to every project we undertake."}
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {[1, 2, 3].map((item) => (
                     <div key={item} className="bg-blue-50 rounded-xl p-5">
                       <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
@@ -305,7 +305,7 @@ function VendorPage() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </div>
             )}
 

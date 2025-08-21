@@ -114,13 +114,19 @@ const EventDetailPage = () => {
                 setRatings({ reviews, average });
             }
 
-            // Check if user can write more reviews based on approved booths vs existing reviews
             if (user?.id && eventData.success && eventData.data && ratingData.success) {
                 const userApprovedBoothsCount = (eventData.data.booth || []).filter(b => b.is_acc === 'APPROVED' && b.user_id === user.id).length;
                 const userExistingReviewsCount = (ratingData.data || []).filter(r => r.user_id === user.id).length;
                 
-                // User can review if they have approved booths and haven't reached the review limit
-                const canWriteMoreReviews = userApprovedBoothsCount > 0 && userExistingReviewsCount < userApprovedBoothsCount;
+                // Check if event has ended (allow reviews only after end_date)
+                const eventEndDate = new Date(eventData.data.end_date);
+                const currentDate = new Date();
+                const eventHasEnded = currentDate > eventEndDate;
+                
+                // User can review if they have approved booths, haven't reached the review limit, AND event has ended
+                const canWriteMoreReviews = userApprovedBoothsCount > 0 && 
+                                          userExistingReviewsCount < userApprovedBoothsCount && 
+                                          eventHasEnded;
                 setIsReviewAble(canWriteMoreReviews);
             } else {
                 setIsReviewAble(false);

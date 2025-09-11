@@ -45,6 +45,7 @@ import {
   getEventVendors,
   updateBooth,
 } from "../models/admin";
+import { formatPhoneForWhatsApp } from "../models/utils";
 
 function EventTab() {
   const [events, setEvents] = useState([]);
@@ -434,7 +435,7 @@ function EventTab() {
           price: formData.price,
           booth_slot: formData.booth_slot || 10, // Default booth slot
           location: formData.location,
-          contact: formData.contact,
+          contact: formatPhoneForWhatsApp(formData.contact),
         };
 
         // console.log("Fields to add:", fieldsToAdd);
@@ -488,7 +489,7 @@ function EventTab() {
           price: formData.price,
           location: formData.location,
           booth_slot: formData.booth_slot || 10, // Default booth slot
-          contact: formData.contact,
+          contact: formatPhoneForWhatsApp(formData.contact),
           banner: formData.banner,
           permit_img: formData.permit_img,
           remove_banner: formData.remove_banner,

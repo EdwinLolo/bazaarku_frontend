@@ -24,6 +24,7 @@ import {
   deleteBooth,
   getEventProduct,
 } from "../models/admin";
+import { formatPhoneForWhatsApp } from "../models/utils";
 
 function EventBoothTab() {
   const [booths, setBooths] = useState([]);
@@ -188,10 +189,13 @@ function EventBoothTab() {
         return;
       }
 
+      // Convert phone number for WhatsApp compatibility
+      const processedPhone = formatPhoneForWhatsApp(formData.phone.trim());
+
       // Prepare data for submission
       const processedData = {
         name: formData.name.trim(),
-        phone: parseInt(formData.phone.trim()),
+        phone: parseInt(processedPhone),
         event_id: parseInt(formData.event_id),
         desc: formData.desc ? formData.desc.trim() : "",
       };

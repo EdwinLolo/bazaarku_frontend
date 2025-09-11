@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import TempImage from '../../assets/Audio Control Panel.png';
+import { formatPhoneForWhatsApp } from '../../models/utils';
 
 const RentalProductPopup = ({ product, onClose }) => {
     const formattedPrice = product?.price
@@ -13,7 +14,7 @@ const RentalProductPopup = ({ product, onClose }) => {
         : 'Price not available';
 
     const whatsappMessage = `Hello, I'm interested in the product ${product?.name} (${formattedPrice}) you have for rent. May I ask for more details?`;
-    const whatsappUrl = `https://wa.me/${product.contact}?text=${encodeURIComponent(
+    const whatsappUrl = `https://wa.me/${formatPhoneForWhatsApp(product.contact)}?text=${encodeURIComponent(
         whatsappMessage
     )}`;
 

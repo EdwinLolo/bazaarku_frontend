@@ -35,6 +35,7 @@ import {
   deleteEventVendor,
   getUserData,
 } from "../models/admin";
+import { formatPhoneForWhatsApp } from "../models/utils";
 
 function EventVendorTab() {
   const [vendors, setVendors] = useState([]);
@@ -298,7 +299,7 @@ function EventVendorTab() {
         const fieldsToAdd = {
           name: safeStringTrim(formData.name),
           desc: safeStringTrim(formData.desc),
-          phone: safeStringTrim(formData.phone),
+          phone: safeStringTrim(formatPhoneForWhatsApp(formData.phone)),
           insta: safeStringTrim(formData.insta),
           location: safeStringTrim(formData.location),
           email: safeStringTrim(formData.email),
@@ -384,7 +385,7 @@ function EventVendorTab() {
           const fieldsToAdd = {
             name: safeStringTrim(formData.name),
             desc: safeStringTrim(formData.desc),
-            phone: safeStringTrim(formData.phone),
+            phone: safeStringTrim(formatPhoneForWhatsApp(formData.phone)),
             insta: safeStringTrim(formData.insta),
             location: safeStringTrim(formData.location),
             email: safeStringTrim(formData.email),
@@ -405,7 +406,7 @@ function EventVendorTab() {
             name: formData.name.trim(),
             desc: formData.desc ? formData.desc.trim() : "",
             phone: formData.phone
-              ? parseInt(String(formData.phone).trim())
+              ? parseInt(formatPhoneForWhatsApp(String(formData.phone).trim()))
               : null,
             insta: formData.insta ? formData.insta.trim() : "",
             location: formData.location ? formData.location.trim() : "",

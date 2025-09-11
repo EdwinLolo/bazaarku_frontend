@@ -33,6 +33,7 @@ import {
   deleteRentalProduct,
   getRentalCategories,
 } from "../models/admin";
+import { formatPhoneForWhatsApp } from "../models/utils";
 
 function RentalTab() {
   const [categories, setCategories] = useState([]);
@@ -258,7 +259,7 @@ function RentalTab() {
           price: formData.price,
           rental_id: formData.rental_id,
           location: safeStringTrim(formData.location),
-          contact: safeStringTrim(formData.contact),
+          contact: formatPhoneForWhatsApp(safeStringTrim(formData.contact)),
           is_ready: formData.is_ready,
         };
 
@@ -311,7 +312,7 @@ function RentalTab() {
             price: formData.price,
             rental_id: formData.rental_id,
             location: safeStringTrim(formData.location),
-            contact: safeStringTrim(formData.contact),
+            contact: formatPhoneForWhatsApp(safeStringTrim(formData.contact)),
             is_ready: formData.is_ready,
           };
 
@@ -347,7 +348,7 @@ function RentalTab() {
             price: formData.price,
             rental_id: formData.rental_id,
             location: safeStringTrim(formData.location),
-            contact: safeStringTrim(formData.contact),
+            contact: formatPhoneForWhatsApp(safeStringTrim(formData.contact)),
             is_ready: formData.is_ready,
           };
 

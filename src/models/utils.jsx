@@ -57,6 +57,16 @@ export const notifyAuthExpiredAndRedirect = async (redirect = "/") => {
   }
 };
 
+// Convert phone number for WhatsApp: if starts with 0, replace with 62
+export const formatPhoneForWhatsApp = (phone) => {
+  if (!phone) return phone;
+  const phoneStr = String(phone).trim();
+  if (phoneStr.startsWith('0')) {
+    return '62' + phoneStr.slice(1);
+  }
+  return phoneStr;
+};
+
 export const apiCall = async (endpoint, options = {}) => {
   const token = localStorage.getItem("session_token");
   const baseURL = BaseURL();

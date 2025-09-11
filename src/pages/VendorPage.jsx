@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getBaseUrl } from "../models/utils";
+import { getBaseUrl, formatPhoneForWhatsApp } from "../models/utils";
 import Loading from "../components/Loading";
 import EventCard from "../components/EventCard";
 import { MapPin, Calendar, Globe, Mail, Edit } from "lucide-react";
@@ -107,17 +107,23 @@ function VendorPage() {
     setLoading(true);
     setError(null);
     try {
+      // Create a copy of formData with phone number conversion
+      const processedFormData = {
+        ...formData,
+        phone: formData.phone ? formatPhoneForWhatsApp(formData.phone) : formData.phone
+      };
+
       const response = await fetch(`${getBaseUrl()}/vendors/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(processedFormData),
       });
       const data = await response.json();
 
       if (data.success) {
-        setVendor((prev) => ({ ...prev, ...formData }));
+        setVendor((prev) => ({ ...prev, ...processedFormData }));
         setIsEditing(false);
       } else {
         setError(data.message || "Failed to update vendor details.");
@@ -391,7 +397,7 @@ function VendorPage() {
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={`https://wa.me/${vendor.phone}`}
+                      href={`https://wa.me/${formatPhoneForWhatsApp(vendor.phone)}`}
                       className="flex items-start cursor-pointer">
                       <div className="bg-blue-100 p-3 rounded-lg mr-4">
                         <FaWhatsapp className="text-blue-600 w-5 h-5" />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Loader2, User, Phone, MessageSquare } from 'lucide-react';
-import { getBaseUrl } from "../../models/utils";
+import { getBaseUrl, formatPhoneForWhatsApp } from "../../models/utils";
 import Swal from "sweetalert2";
 
 function ApplyBoothPopup({ event, user_id, onClose }) {
@@ -40,6 +40,9 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
             newErrors.phone = "Phone number is required";
         } else if (!/^\+?[0-9\s-()]{7,}$/.test(formData.phone)) {
             newErrors.phone = "Please enter a valid phone number";
+        } else {
+            // Convert phone number for WhatsApp compatibility
+            formData.phone = formatPhoneForWhatsApp(formData.phone);
         }
 
         if (!formData.desc.trim()) {

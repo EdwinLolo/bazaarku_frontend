@@ -4,7 +4,7 @@ import { MapPin, Calendar, Users, Store, Phone, Star, User } from "lucide-react"
 import { FaWhatsapp } from 'react-icons/fa';
 import Swal from "sweetalert2";
 
-import { getBaseUrl } from "../models/utils";
+import { getBaseUrl, formatPhoneForWhatsApp } from "../models/utils";
 import { useAuth } from "../App";
 
 import Loading from "../components/Loading";
@@ -446,7 +446,7 @@ const EventDetailPage = () => {
                                     For inquiries or more information, you can contact the event organizer directly via WhatsApp.
                                 </p>
                                 <a
-                                    href={`https://wa.me/${event.contact}`}
+                                    href={`https://wa.me/${formatPhoneForWhatsApp(event.contact)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-semibold rounded-xl shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"

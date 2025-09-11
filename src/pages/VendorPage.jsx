@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getBaseUrl, formatPhoneForWhatsApp, formatPhoneInput } from "../models/utils";
+import { getBaseUrl, formatPhoneForWhatsApp } from "../models/utils";
 import Loading from "../components/Loading";
 import EventCard from "../components/EventCard";
 import { MapPin, Calendar, Globe, Mail, Edit } from "lucide-react";
@@ -99,14 +99,8 @@ function VendorPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    let processedValue = value;
     
-    // Format phone number in real-time
-    if (name === 'phone') {
-      processedValue = formatPhoneInput(value);
-    }
-    
-    setFormData((prev) => ({ ...prev, [name]: processedValue }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFormSubmit = async (e) => {

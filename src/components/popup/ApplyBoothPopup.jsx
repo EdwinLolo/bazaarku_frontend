@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Loader2, User, Phone, MessageSquare } from 'lucide-react';
-import { getBaseUrl, formatPhoneForWhatsApp, formatPhoneInput } from "../../models/utils";
+import { getBaseUrl, formatPhoneForWhatsApp } from "../../models/utils";
 import Swal from "sweetalert2";
 
 function ApplyBoothPopup({ event, user_id, onClose }) {
@@ -15,16 +15,10 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        let processedValue = value;
-        
-        // Format phone number in real-time
-        if (name === 'phone') {
-            processedValue = formatPhoneInput(value);
-        }
         
         setFormData((prev) => ({
             ...prev,
-            [name]: processedValue,
+            [name]: value,
         }));
 
         // Clear error when user starts typing
@@ -47,9 +41,6 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
             newErrors.phone = "Phone number is required";
         } else if (!/^(\+?62|62|0)[0-9\s-()]{8,}$/.test(formData.phone)) {
             newErrors.phone = "Please enter a valid Indonesian phone number";
-        } else {
-            // Convert phone number for WhatsApp compatibility
-            formData.phone = formatPhoneForWhatsApp(formData.phone);
         }
 
         if (!formData.desc.trim()) {
@@ -73,13 +64,22 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
         console.log("Submitting application with data:", { ...formData, eventId: event.id });
         try {
             const token = localStorage.getItem("access_token");
+            
+            // Format phone number for backend submission
+            const processedFormData = {
+                ...formData,
+                phone: formatPhoneForWhatsApp(formData.phone),
+                event_id: event.id,
+                user_id: user_id
+            };
+            
             const response = await fetch(`${getBaseUrl()}/booths`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ ...formData, event_id: event.id, user_id: user_id }),
+                body: JSON.stringify(processedFormData),
             });
 
             const responseData = await response.json();

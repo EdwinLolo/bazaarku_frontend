@@ -33,7 +33,7 @@ import {
   deleteRentalProduct,
   getRentalCategories,
 } from "../models/admin";
-import { formatPhoneForWhatsApp } from "../models/utils";
+import { formatPhoneForWhatsApp, formatPhoneInput } from "../models/utils";
 
 function RentalTab() {
   const [categories, setCategories] = useState([]);
@@ -650,11 +650,13 @@ function RentalTab() {
             <TextField
               label="Contact"
               fullWidth
+              type="tel"
               value={formData.contact}
               onChange={(e) =>
-                setFormData({ ...formData, contact: e.target.value })
+                setFormData({ ...formData, contact: formatPhoneInput(e.target.value) })
               }
-              placeholder="Contact information"
+              placeholder="628123456789"
+              helperText="Contact phone number"
             />
 
             <TextField

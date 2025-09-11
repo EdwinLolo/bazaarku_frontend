@@ -45,7 +45,7 @@ import {
   getEventVendors,
   updateBooth,
 } from "../models/admin";
-import { formatPhoneForWhatsApp } from "../models/utils";
+import { formatPhoneForWhatsApp, formatPhoneInput } from "../models/utils";
 
 function EventTab() {
   const [events, setEvents] = useState([]);
@@ -924,10 +924,13 @@ function EventTab() {
             <TextField
               label="Contact"
               fullWidth
+              type="tel"
               value={formData.contact}
               onChange={(e) =>
-                setFormData({ ...formData, contact: e.target.value })
+                setFormData({ ...formData, contact: formatPhoneInput(e.target.value) })
               }
+              placeholder="628123456789"
+              helperText="Contact phone number"
             />
             <TextField
               label="Start Date"

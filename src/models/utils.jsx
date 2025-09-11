@@ -57,13 +57,40 @@ export const notifyAuthExpiredAndRedirect = async (redirect = "/") => {
   }
 };
 
-// Convert phone number for WhatsApp: if starts with 0, replace with 62
+// Convert phone number for WhatsApp: remove +, if starts with 0 replace with 62
 export const formatPhoneForWhatsApp = (phone) => {
   if (!phone) return phone;
-  const phoneStr = String(phone).trim();
+  let phoneStr = String(phone).trim();
+  
+  // Remove + sign if present
+  if (phoneStr.startsWith('+')) {
+    phoneStr = phoneStr.slice(1);
+  }
+  
+  // If starts with 0, replace with 62
   if (phoneStr.startsWith('0')) {
     return '62' + phoneStr.slice(1);
   }
+  
+  // If already starts with 62, return as is
+  return phoneStr;
+};
+
+// Format phone number for real-time input (as user types)
+export const formatPhoneInput = (phone) => {
+  if (!phone) return phone;
+  let phoneStr = String(phone).trim();
+  
+  // Remove + sign if present
+  if (phoneStr.startsWith('+')) {
+    phoneStr = phoneStr.slice(1);
+  }
+  
+  // If starts with 0, replace with 62 immediately
+  if (phoneStr.startsWith('0')) {
+    return '62' + phoneStr.slice(1);
+  }
+  
   return phoneStr;
 };
 

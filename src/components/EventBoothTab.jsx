@@ -24,7 +24,7 @@ import {
   deleteBooth,
   getEventProduct,
 } from "../models/admin";
-import { formatPhoneForWhatsApp } from "../models/utils";
+import { formatPhoneForWhatsApp, formatPhoneInput } from "../models/utils";
 
 function EventBoothTab() {
   const [booths, setBooths] = useState([]);
@@ -488,7 +488,7 @@ function EventBoothTab() {
               required
               value={formData.phone}
               onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
+                setFormData({ ...formData, phone: formatPhoneInput(e.target.value) })
               }
               placeholder="628123456789"
               helperText="Contact phone number"

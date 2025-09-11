@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Loader2, User, Phone, MessageSquare } from 'lucide-react';
-import { getBaseUrl, formatPhoneForWhatsApp } from "../../models/utils";
+import { getBaseUrl, formatPhoneForWhatsApp, formatPhoneInput } from "../../models/utils";
 import Swal from "sweetalert2";
 
 function ApplyBoothPopup({ event, user_id, onClose }) {
@@ -15,9 +15,16 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        let processedValue = value;
+        
+        // Format phone number in real-time
+        if (name === 'phone') {
+            processedValue = formatPhoneInput(value);
+        }
+        
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: processedValue,
         }));
 
         // Clear error when user starts typing
@@ -38,8 +45,8 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
 
         if (!formData.phone.trim()) {
             newErrors.phone = "Phone number is required";
-        } else if (!/^\+?[0-9\s-()]{7,}$/.test(formData.phone)) {
-            newErrors.phone = "Please enter a valid phone number";
+        } else if (!/^(\+?62|62|0)[0-9\s-()]{8,}$/.test(formData.phone)) {
+            newErrors.phone = "Please enter a valid Indonesian phone number";
         } else {
             // Convert phone number for WhatsApp compatibility
             formData.phone = formatPhoneForWhatsApp(formData.phone);
@@ -169,7 +176,7 @@ function ApplyBoothPopup({ event, user_id, onClose }) {
                                             ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
                                             : "border-gray-300 focus:ring-blue-500/50 focus:border-blue-500"
                                             }`}
-                                        placeholder="e.g., 08123456789"
+                                        placeholder="e.g., 62123456789"
                                         disabled={isLoading}
                                     />
                                 </div>

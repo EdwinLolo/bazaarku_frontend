@@ -35,7 +35,7 @@ import {
   deleteEventVendor,
   getUserData,
 } from "../models/admin";
-import { formatPhoneForWhatsApp } from "../models/utils";
+import { formatPhoneForWhatsApp, formatPhoneInput } from "../models/utils";
 
 function EventVendorTab() {
   const [vendors, setVendors] = useState([]);
@@ -693,7 +693,7 @@ function EventVendorTab() {
               type="tel"
               value={formData.phone}
               onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
+                setFormData({ ...formData, phone: formatPhoneInput(e.target.value) })
               }
               placeholder="628123456789"
             />
